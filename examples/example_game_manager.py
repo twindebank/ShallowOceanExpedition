@@ -16,7 +16,7 @@ def main():
     ]
     game_manager = GameManager(strategies)
     game_manager.run_n_games_and_rotate_strategies(1000)
-    game_manager.plot_wins('wins_no_rotate.png')
+    game_manager.plot_wins('wins.png')
 
 
 if __name__ == '__main__':
