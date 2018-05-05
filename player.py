@@ -21,6 +21,8 @@ class Player:
         self.n_turn = 0
         self.strategy = strategy
         self.finished = False
+        self.killed = False
+        self.deaths = []
 
     @property
     def is_home(self):
@@ -55,15 +57,17 @@ class Player:
     def kill(self):
         print(f"- {self.name} didn't make it, they lost {self.count_tiles()} tiles :-(")
         dropped_tiles = self.tiles
-        self.reset(game_finished=True)
+        self.killed = True
         return dropped_tiles
 
-    def reset(self, game_finished=False):
+    def reset(self):
         self.tiles = []
         self.position = 0
         self.direction = 1
         self.n_turn = 0
-        self.finished = not game_finished
+        self.finished = False
+        self.deaths.append(self.killed)
+        self.killed = False
 
     @player_must_be_finished
     def get_tile_values(self):
