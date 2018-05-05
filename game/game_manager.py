@@ -5,6 +5,7 @@ from pandas import DataFrame
 # todo: custom logging levels: turn, round, game
 # todo: attatch name to strategy instead of player so only strategy has to be written
 from game.components.player import Player
+from game.utils.logging import logger, SIM
 
 
 class GameManager:
@@ -27,6 +28,7 @@ class GameManager:
             self.run_n_rounds(rounds_per_game)
 
     def run_n_games_and_rotate_players(self, n_games_per_rotation, rounds_per_game=3):
+        logger.log(SIM, 'Running {n_games_per_rotation} games...')
         for n_player in range(len(self.players)):
             self.run_n_games(n_games_per_rotation, rounds_per_game)
             self.players = [self.players.pop()] + self.players
@@ -39,6 +41,7 @@ class GameManager:
         pass
 
     def plot_wins(self, save_path):
+        logger.log(SIM, 'Plotting wins...')
         wins = {}
         for game_stat in self.stats:
             for player_name, player_stat in game_stat.items():
@@ -52,4 +55,5 @@ class GameManager:
             'Wins': list(wins.values())
         })
         plot = Chart(wins_df).mark_bar().encode(x='Players', y='Wins')
+        logger.log(SIM, f'Saving plot to file "{save_path}"')
         plot.save(save_path)

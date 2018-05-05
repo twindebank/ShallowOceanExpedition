@@ -1,6 +1,8 @@
 from random import randint
 
-from game.exceptions import Cheating
+from game.utils.exceptions import Cheating
+from game.utils.logging import logger, TURN, ROUND
+
 
 def player_must_be_finished(attempted_func):
     def raise_if_cheating(player, *args, **kwargs):
@@ -10,6 +12,7 @@ def player_must_be_finished(attempted_func):
             return attempted_func(player, *args, **kwargs)
 
     return raise_if_cheating
+
 
 class Player:
     def __init__(self, strategy):
@@ -31,8 +34,8 @@ class Player:
     def roll(self):
         roll = (randint(1, 3) + randint(1, 3))
         moves = max(roll - self.count_tiles(), 0)
-        print(f'- {self.name} rolled a {roll} {"forward" if self.direction>0 else "backward"}'
-              f': move {moves}!')
+        logger.log(TURN, f'- {self.name} rolled a {roll} {"forward" if self.direction>0 else "backward"}'
+                         f': move {moves}!')
         return self.direction * moves
 
     def collect_tile(self, tile):
@@ -49,13 +52,13 @@ class Player:
         return {level: tile_levels.count(level) for level in set(tile_levels)}
 
     def change_direction(self):
-        print(f'- {self.name} changed direction!')
+        logger.log(TURN, f'- {self.name} changed direction!')
         if self.direction == -1:
             raise Cheating('You cant turn around again you cheating bugger!')
         self.direction = -1
 
     def kill(self):
-        print(f"- {self.name} didn't make it, they lost {self.count_tiles()} tiles :-(")
+        logger.log(ROUND, f"- {self.name} didn't make it, they lost {self.count_tiles()} tiles :-(")
         dropped_tiles = self.tiles
         self.killed = True
         return dropped_tiles
@@ -79,7 +82,7 @@ class Player:
 
     @player_must_be_finished
     def bank_tiles(self):
-        print(f"{self.name} made it!!")
+        logger.log(ROUND, f"{self.name} made it!!")
         value = self.get_tile_values()
         self.bank += value
         self.finished = True
@@ -94,5 +97,3 @@ class Player:
 
     def __repr__(self):
         return self.name
-
-

@@ -1,7 +1,8 @@
 from itertools import cycle
 
-from game.exceptions import RoundOver
+from game.utils.exceptions import RoundOver
 from game.components.tiles import Submarine, TileStack, Tile
+from game.utils.logging import logger, GAME, TURN, ROUND
 
 
 class Board:
@@ -18,10 +19,9 @@ class Board:
         self.oxygen = oxygen
         self.player_cycle = cycle(players)
         self.current_player = next(self.player_cycle)
-        print(f'Welcome players {", ".join([player.name for player in players])} for round {self.round_number}!!')
+        logger.log(GAME, f'Welcome players {", ".join([player.name for player in players])} for round {self.round_number}!!')
         for player in players:
-            print(player)
-
+            logger.log(GAME, player)
 
     def play_round(self):
         while True:
@@ -33,7 +33,7 @@ class Board:
 
     def _take_turn(self):
         if not self.current_player.finished:
-            print(f"\nIt's {self.current_player.name}'s go!")
+            logger.log(TURN, f"\nIt's {self.current_player.name}'s go!")
             self._reduce_ox_by(self.current_player.count_tiles())
             self._apply_current_player_direction_strategy()
             landed_on = self._advance_current_player()
@@ -42,7 +42,7 @@ class Board:
                     self._apply_current_player_drop_strategy()
                 else:
                     self._apply_current_player_collect_strategy(landed_on)
-            print(self.current_player)
+            logger.log(TURN, self.current_player)
         if not self._has_players():
             self._end_round()
         else:
@@ -59,7 +59,7 @@ class Board:
         if do_pickup:
             self.current_player.collect_tile(landed_on)
             self.tiles[self.current_player.position] = Tile(0)
-            print(f'- {self.current_player.name} picked up a level {landed_on.level} tile!!')
+            logger.log(TURN, f'- {self.current_player.name} picked up a level {landed_on.level} tile!!')
 
     def _apply_current_player_drop_strategy(self):
         do_drop = self.current_player.strategy.tile_drop(*self._summarise_game())
@@ -102,11 +102,11 @@ class Board:
 
     def _reduce_ox_by(self, n):
         if n > 0:
-            print(f'- {self.current_player.name} has {self.current_player.count_tiles()} tile(s), oxygen reduced from '
-                  f'{self.oxygen} to {self.oxygen - n}')
+            logger.log(TURN, f'- {self.current_player.name} has {self.current_player.count_tiles()} tile(s), oxygen reduced '
+                        f'from {self.oxygen} to {self.oxygen - n}')
         self.oxygen -= n
         if self.oxygen < 0:
-            print('\nOxygen depleted!')
+            logger.log(ROUND, '\nOxygen depleted!')
             self._end_round()
 
     def _end_round(self):
@@ -122,9 +122,9 @@ class Board:
         self.round_number += 1
         self.oxygen = self.original_oxygen
         self._soft_reset_players()
-        print(f'Round {self.round_number} over, player summaries:')
+        logger.log(ROUND, f'Round {self.round_number} over, player summaries:')
         for player in self.players:
-            print(player)
+            logger.log(ROUND, player)
         raise RoundOver('Round over!')
 
     def _soft_reset_players(self):
@@ -164,17 +164,17 @@ class Board:
         return player, board, other_players
 
     def print_end_game_summary(self):
-        print('\nGame over!')
+        logger.log(GAME, '\nGame over!')
         banks = {player.name: player.bank for player in self.players}
         winner = max(banks, key=banks.get)
-        print(f'The winner is {winner} with a score of {banks[winner]}!!')
+        logger.log(GAME, f'The winner is {winner} with a score of {banks[winner]}!!')
         del banks[winner]
-        print(f'Other scores: {banks}')
+        logger.log(GAME, f'Other scores: {banks}')
 
     def _order_players(self):
         if self._has_players():
             # if player killed then furthest one
-            positions = {player.name:player.position for player in self.players}
+            positions = {player.name: player.position for player in self.players}
             last_player = max(positions, key=positions.get)
             while self.current_player.name != last_player:
                 self._next_player()
@@ -190,5 +190,3 @@ class Board:
                 'deaths': player.deaths
             }
         return stats
-
-
