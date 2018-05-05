@@ -1,4 +1,4 @@
-# Shallow Ocean Expedition
+# Shallow Ocean Expedition :ocean: :ship:
 
 Simulate runs of a game with the ability to define custom strategies. 
 Written in Python 3.6.
