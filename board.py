@@ -17,7 +17,7 @@ class PlayerHome(Exception):
 
 class Board:
     def __init__(self, players, oxygen=25, n_level_1=5, n_level_2=5, n_level_3=5, n_level_4=5):
-        self.players = [Player(player_name, strategy, self) for player_name, strategy in players.items()]
+        self.players = players
         self.tiles = \
             [Submarine()] + \
             [Tile(1)] * n_level_1 + \
@@ -27,10 +27,10 @@ class Board:
         self.round_number = 0
         self.original_oxygen = oxygen
         self.oxygen = oxygen
-        self.player_cycle = cycle(self.players)
+        self.player_cycle = cycle(players)
         self.current_player = next(self.player_cycle)
-        print(f'Welcome players {", ".join([player.name for player in self.players])} for round {self.round_number}!!')
-        for player in self.players:
+        print(f'Welcome players {", ".join([player.name for player in players])} for round {self.round_number}!!')
+        for player in players:
             print(player)
 
     def take_turn(self):
@@ -51,14 +51,14 @@ class Board:
         return [tile.level for tile in self.tiles]
 
     def _apply_current_player_collect_strategy(self, landed_on):
-        do_pickup = self.current_player.strategy.tile_collect()
+        do_pickup = self.current_player.strategy.tile_collect(*self.strategy_summary())
         if do_pickup:
             self.current_player.collect_tile(landed_on)
             self.tiles[self.current_player_position] = Tile(0)
             print(f'- {self.current_player.name} picked up a level {landed_on.level} tile!!')
 
     def _apply_current_player_drop_strategy(self):
-        do_drop = self.current_player.strategy.tile_drop()
+        do_drop = self.current_player.strategy.tile_drop(*self.strategy_summary())
         if do_drop:
             dropped = self.current_player.drop_tile()
             self.tiles[self.current_player_position] = dropped
@@ -132,8 +132,6 @@ class Board:
             print(player)
         raise RoundOver('Round over!')
         # TODO: sort out ordering of players for new round
-        # TODO: sort out resetting of players for new round
-        #   - board needs to reset all players regardless of wether ox runs out or not
 
     def reset_players(self):
         for player in self.players:
@@ -145,7 +143,7 @@ class Board:
         self.tiles.extend(ordered_stacks)
 
     def _apply_current_player_direction_strategy(self):
-        do_change = self.current_player.strategy.decide_direction()
+        do_change = self.current_player.strategy.decide_direction(*self.strategy_summary())
         if do_change:
             self.current_player.change_direction()
 
@@ -156,6 +154,29 @@ class Board:
         print(f'The winner is {winner} with a score of {banks[winner]}!!')
         del banks[winner]
         print(f'Other scores: {banks}')
+
+    def strategy_summary(self):
+        player = {
+            'tiles': self.current_player.summarise_tiles(),
+            'position': self.current_player.position,
+            'bank': self.current_player.bank,
+            'changed_direction': False if self.current_player.direction > 0 else True,
+            'turn_number': self.current_player.n_turn
+        }
+        board = {
+            'tiles': self.summarise_tile_levels(),
+            'round_number': self.round_number
+        }
+        other_players = {
+            player.name: {
+                'tiles': self.current_player.summarise_tiles(),
+                'position': self.current_player.position,
+                'bank': self.current_player.bank,
+                'changed_direction': True if self.current_player.direction > 0 else False,
+                'turn_number': self.current_player.n_turn
+            } for player in self.get_other_players()
+        }
+        return player, board, other_players
 
 
 
@@ -222,14 +243,14 @@ def player_must_be_finished(attempted_func):
 
 
 class Player:
-    def __init__(self, name, strategy, board):
+    def __init__(self, name, strategy):
         self.name = name
         self.position = 0
         self.tiles = []
         self.direction = 1
         self.bank = 0
         self.n_turn = 0
-        self.strategy = strategy(self, board)
+        self.strategy = strategy
         self.finished = False
 
     @property
@@ -299,56 +320,26 @@ class Player:
 
 
 class DefaultStrategy:
-    def __init__(self, player, board):
-        self._player = player
-        self._board = board
-
-    def decide_direction(self):
+    def decide_direction(self, player, board, others):
         # should receive read only views of board and player
-        me, board, others = self.game_info
-        change = True if me['turn_number'] > 1 and not me['changed_direction'] else False
+        change = True if player['turn_number'] > 1 and not player['changed_direction'] else False
         return change
 
-    def tile_collect(self):
-        me, board, others = self.game_info
+    def tile_collect(self, player, board, others):
         # pick all up
         return True
 
-    def tile_drop(self):
-        me, board, others = self.game_info
+    def tile_drop(self, player, board, others):
         # dont drop any
         return False
 
-    @property
-    def game_info(self):
-        me = {
-            'tiles': self._player.summarise_tiles(),
-            'position': self._player.position,
-            'bank': self._player.bank,
-            'changed_direction': False if self._player.direction > 0 else True,
-            'turn_number': self._player.n_turn
-        }
-        other_players = {
-            player.name: {
-                'tiles': player.summarise_tiles(),
-                'position': player.position,
-                'bank': player.bank,
-                'changed_direction': True if player.direction > 0 else False,
-                'turn_number': player.n_turn
-            } for player in self._board.get_other_players()
-        }
-        board = {
-            'tiles': self._board.summarise_tile_levels(),
-            'round_number': self._board.round_number
-        }
-        return me, board, other_players
 
 
 def main():
-    players = {
-        'Theo': DefaultStrategy,
-        'Tati': DefaultStrategy
-    }
+    players = [
+        Player('Theo',DefaultStrategy()),
+        Player('Tati', DefaultStrategy())
+    ]
     board = Board(players)
     play_round(board)
     play_round(board)
