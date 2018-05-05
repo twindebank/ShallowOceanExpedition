@@ -14,7 +14,7 @@ Written in Python 3.6.
 To run the examples included: 
 - `python -m examples.example_game_manager` for an example of 
 how to simulate a number of games and gather/plot statistics. 
-The output plot will be saved to `wins.png` in the root directory of the package.
+This example will run 1000 simulations and rotate the order of the players, output plot will be saved to `wins.png` in the root directory of the package.
 - `python -m examples.example_game` for an example of how to 
 run a single game with a more verbose output.
 
@@ -27,3 +27,4 @@ Create a class inheriting from `game.components.strategy.DefaultStrategy` and ov
 2. Package the module so it can be installed
 3. Tests
 4. Docstrings
+5. Add more kinds of plots
