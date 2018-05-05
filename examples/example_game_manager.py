@@ -1,6 +1,8 @@
 from game.game_manager import GameManager
 from game.components.strategy import DefaultStrategy
+from game.utils.logging import logger, SIM
 
+logger.setLevel(SIM)
 
 def main():
     strategies = [

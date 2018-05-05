@@ -11,4 +11,19 @@ Written in Python 3.6.
     - `pip install -r requirements.txt`
 
 ## Run
-To run the example included, run `python -m `
+To run the examples included: 
+- `python -m examples.example_game_manager` for an example of 
+how to simulate a number of games and gather/plot statistics. 
+The output plot will be saved to `wins.png` in the root directory of the package.
+- `python -m examples.example_game` for an example of how to 
+run a single game with a more verbose output.
+
+## Strategies
+Create a class inheriting from `game.components.strategy.DefaultStrategy` and override the methods.
+
+
+## ToDo
+1. More documentation/examples of custom strategies
+2. Package the module so it can be installed
+3. Tests
+4. Docstrings
