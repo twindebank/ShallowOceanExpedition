@@ -177,12 +177,12 @@ class Board:
 
     def get_stats(self):
         banks = {player.name: player.bank for player in self.players}
-        rank = sorted(banks, key=banks.get, reverse=True)
+        ranks = sorted(banks, key=banks.get, reverse=True)
         stats = {}
         for player in self.players:
             stats[player.name] = {
                 'score': player.bank,
-                'place': rank.index(player.name),
+                'rank': ranks.index(player.name),
                 'deaths': player.deaths
             }
         return stats
