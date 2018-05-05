@@ -18,5 +18,6 @@
 
 # test tile stacks with banking
 
-# test picking up submarine tile
+# test fail picking up submarine tile
 
+# loads more

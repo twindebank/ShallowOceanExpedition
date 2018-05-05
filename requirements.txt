@@ -1,0 +1,12 @@
+tqdm
+altair==2.0.1
+entrypoints==0.2.3
+jsonschema==2.6.0
+numpy==1.14.3
+pandas==0.22.0
+python-dateutil==2.7.2
+pytz==2018.4
+selenium==3.11.0
+six==1.11.0
+toolz==0.9.0
+typing==3.6.4

@@ -1,13 +1,14 @@
 from itertools import cycle
 
+from game.components.player import Player
 from game.utils.exceptions import RoundOver
 from game.components.tiles import Submarine, TileStack, Tile
 from game.utils.logging import logger, GAME, TURN, ROUND
 
 
 class Board:
-    def __init__(self, players, oxygen=25, n_level_1=5, n_level_2=5, n_level_3=5, n_level_4=5):
-        self.players = players
+    def __init__(self, strategies, oxygen=25, n_level_1=5, n_level_2=5, n_level_3=5, n_level_4=5):
+        self.players = [Player(strategy) for strategy in strategies]
         self.tiles = \
             [Submarine()] + \
             [Tile(1)] * n_level_1 + \
@@ -17,10 +18,10 @@ class Board:
         self.round_number = 0
         self.original_oxygen = oxygen
         self.oxygen = oxygen
-        self.player_cycle = cycle(players)
+        self.player_cycle = cycle(self.players)
         self.current_player = next(self.player_cycle)
-        logger.log(GAME, f'Welcome players {", ".join([player.name for player in players])} for round {self.round_number}!!')
-        for player in players:
+        logger.log(GAME, f'Welcome players {", ".join([player.name for player in self.players])} for round {self.round_number}!!')
+        for player in self.players:
             logger.log(GAME, player)
 
     def play_round(self):

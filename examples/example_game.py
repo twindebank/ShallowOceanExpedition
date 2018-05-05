@@ -1,6 +1,8 @@
-from game.game_manager import GameManager
+from game.components.board import Board
 from game.components.strategy import DefaultStrategy
+from game.utils.logging import logger, TURN
 
+logger.setLevel(TURN)
 
 def main():
     strategies = [
@@ -12,10 +14,13 @@ def main():
         DefaultStrategy('Maria'),
         DefaultStrategy('Lisa'),
     ]
-    game_manager = GameManager(strategies)
-    game_manager.run_n_games_and_rotate_strategies(1000)
-    game_manager.plot_wins('wins.png')
+    board = Board(strategies)
+    for _ in range(3):
+        board.play_round()
+    board.print_end_game_summary()
 
+
+print('Done!')
 
 if __name__ == '__main__':
     main()
