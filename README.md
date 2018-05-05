@@ -23,8 +23,9 @@ Create a class inheriting from `game.components.strategy.DefaultStrategy` and ov
 
 
 ## ToDo
-1. More documentation/examples of custom strategies
-2. Package the module so it can be installed
-3. Tests
-4. Docstrings
-5. Add more kinds of plots
+- More documentation/examples of custom strategies
+- Package the module so it can be installed
+- Tests
+- Docstrings
+- Add more kinds of plots
+- account for cases where nobody wins
