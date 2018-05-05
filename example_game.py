@@ -1,5 +1,4 @@
 from board import Board
-from exceptions import RoundOver
 from player import Player
 from strategy import DefaultStrategy
 
@@ -10,19 +9,8 @@ def main():
         Player('Tati', DefaultStrategy())
     ]
     board = Board(players)
-    play_round(board)
-    play_round(board)
-    play_round(board)
-    board.end_game_summary()
+    board.play_n_rounds(3)
     print('Done!')
-
-
-def play_round(board):
-    while board.has_players():
-        try:
-            board.take_turn()
-        except RoundOver:
-            break
 
 
 if __name__ == '__main__':

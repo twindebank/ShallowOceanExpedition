@@ -29,8 +29,8 @@ class Player:
     def roll(self):
         roll = (randint(1, 3) + randint(1, 3))
         moves = max(roll - self.count_tiles(), 0)
-        print(f'- {self.name} rolled a {roll} {"forward" if self.direction>0 else "backward"}, '
-              f'so they have {moves} moves!')
+        print(f'- {self.name} rolled a {roll} {"forward" if self.direction>0 else "backward"}'
+              f': move {moves}!')
         return self.direction * moves
 
     def collect_tile(self, tile):
@@ -55,7 +55,7 @@ class Player:
     def kill(self):
         print(f"- {self.name} didn't make it, they lost {self.count_tiles()} tiles :-(")
         dropped_tiles = self.tiles
-        self.reset()
+        self.reset(game_finished=True)
         return dropped_tiles
 
     def reset(self, game_finished=False):

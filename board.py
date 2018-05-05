@@ -22,7 +22,19 @@ class Board:
         for player in players:
             print(player)
 
-    def take_turn(self):
+    def play_n_rounds(self, n):
+        for _ in range(n):
+            self._play_round()
+        self._end_game_summary()
+
+    def _play_round(self):
+        while True:
+            try:
+                self._take_turn()
+            except RoundOver:
+                break
+
+    def _take_turn(self):
         if not self.current_player.finished:
             print(f"\nIt's {self.current_player.name}'s go!")
             self._reduce_ox_by(self.current_player.count_tiles())
@@ -34,41 +46,41 @@ class Board:
                 else:
                     self._apply_current_player_collect_strategy(landed_on)
             print(self.current_player)
-        self._next_player()
+        if not self._has_players():
+            self._end_round()
+        else:
+            self._next_player()
 
-    def has_players(self):
+    def _has_players(self):
         return bool(sum(not player.finished for player in self.players))
-
-    def end_game_summary(self):
-        print('\nGame over!')
-        banks = {player.name: player.bank for player in self.players}
-        winner = max(banks, key=banks.get)
-        print(f'The winner is {winner} with a score of {banks[winner]}!!')
-        del banks[winner]
-        print(f'Other scores: {banks}')
 
     def _summarise_tile_levels(self):
         return [tile.level for tile in self.tiles]
 
     def _apply_current_player_collect_strategy(self, landed_on):
-        do_pickup = self.current_player.strategy.tile_collect(*self._strategy_summary())
+        do_pickup = self.current_player.strategy.tile_collect(*self._summarise_game())
         if do_pickup:
             self.current_player.collect_tile(landed_on)
-            self.tiles[self._current_player_position] = Tile(0)
+            self.tiles[self.current_player.position] = Tile(0)
             print(f'- {self.current_player.name} picked up a level {landed_on.level} tile!!')
 
     def _apply_current_player_drop_strategy(self):
-        do_drop = self.current_player.strategy.tile_drop(*self._strategy_summary())
+        do_drop = self.current_player.strategy.tile_drop(*self._summarise_game())
         if do_drop:
             dropped = self.current_player.drop_tile()
-            self.tiles[self._current_player_position] = dropped
+            self.tiles[self.current_player.position] = dropped
+
+    def _apply_current_player_direction_strategy(self):
+        do_change = self.current_player.strategy.decide_direction(*self._summarise_game())
+        if do_change:
+            self.current_player.change_direction()
 
     def _advance_current_player(self):
         roll = self.current_player.roll()
         new_position = self._calculate_new_position(roll)
-        self._current_player_position = new_position
+        self.current_player.position = new_position
         self.current_player.n_turn += 1
-        if self._current_player_position == 0:
+        if self.current_player.position == 0:
             self.current_player.finished = True
             self.current_player.bank_tiles()
             return None
@@ -76,23 +88,11 @@ class Board:
 
     def _calculate_new_position(self, roll):
         other_positions = [pos for pos in self._get_other_player_positions() if pos > 0]
-        curr_position = self._current_player_position
+        curr_position = self.current_player.position
         for other_player_pos in other_positions:
             if curr_position <= other_player_pos <= curr_position + roll:
                 roll += 1
         return max(0, min(curr_position + roll, len(self.tiles) - 1))
-
-    @property
-    def _current_player_position(self):
-        return self.current_player.position
-
-    @_current_player_position.setter
-    def _current_player_position(self, new_position):
-        self.current_player.position = new_position
-
-    @property
-    def _current_player_tile_at_position(self):
-        return self.tiles[self._current_player_position]
 
     def _get_other_player_positions(self):
         return [player.position for player in self.players if player is not self.current_player]
@@ -109,11 +109,12 @@ class Board:
                   f'{self.oxygen} to {self.oxygen - n}')
         self.oxygen -= n
         if self.oxygen < 0:
-            self._oxygen_depleted()
+            print('\nOxygen depleted!')
+            self._end_round()
 
-    def _oxygen_depleted(self):
-        print('\nOxygen depleted!')
+    def _end_round(self):
         dropped_tiles = {}
+        self._order_players()
         for player in self.players:
             if not player.finished:
                 dropped = player.kill()
@@ -124,11 +125,10 @@ class Board:
         self.round_number += 1
         self.oxygen = self.original_oxygen
         self._reset_players()
-        print('Round over, player summaries:')
+        print(f'Round {self.round_number} over, player summaries:')
         for player in self.players:
             print(player)
         raise RoundOver('Round over!')
-        # TODO: sort out ordering of players for new round
 
     def _reset_players(self):
         for player in self.players:
@@ -139,12 +139,7 @@ class Board:
         self.tiles = [tile for tile in self.tiles if tile.level != 0]
         self.tiles.extend(ordered_stacks)
 
-    def _apply_current_player_direction_strategy(self):
-        do_change = self.current_player.strategy.decide_direction(*self._strategy_summary())
-        if do_change:
-            self.current_player.change_direction()
-
-    def _strategy_summary(self):
+    def _summarise_game(self):
         player = {
             'tiles': self.current_player.summarise_tiles(),
             'position': self.current_player.position,
@@ -167,7 +162,20 @@ class Board:
         }
         return player, board, other_players
 
+    def _end_game_summary(self):
+        print('\nGame over!')
+        banks = {player.name: player.bank for player in self.players}
+        winner = max(banks, key=banks.get)
+        print(f'The winner is {winner} with a score of {banks[winner]}!!')
+        del banks[winner]
+        print(f'Other scores: {banks}')
 
-
+    def _order_players(self):
+        if self._has_players():
+            # if player killed then furthest one
+            positions = {player.name:player.position for player in self.players}
+            last_player = max(positions, key=positions.get)
+            while self.current_player.name != last_player:
+                self._next_player()
 
 
