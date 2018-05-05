@@ -1,12 +1,12 @@
 from game.components.board import Board
 from altair import Chart
 from pandas import DataFrame
+from tqdm import tqdm
 
 # todo: custom logging levels: turn, round, game
 # todo: attatch name to strategy instead of player so only strategy has to be written
 from game.components.player import Player
 from game.utils.logging import logger, SIM
-
 
 class GameManager:
     def __init__(self, strategies, **board_params):
@@ -24,15 +24,15 @@ class GameManager:
         self.stats.append(stats)
 
     def run_n_games(self, n, rounds_per_game=3):
-        for _ in range(n):
+        iter = tqdm(range(n)) if logger.level == SIM else range(n)
+        for _ in iter:
             self.run_n_rounds(rounds_per_game)
 
     def run_n_games_and_rotate_players(self, n_games_per_rotation, rounds_per_game=3):
-        logger.log(SIM, 'Running {n_games_per_rotation} games...')
+        logger.log(SIM, f'Running {n_games_per_rotation} games...')
         for n_player in range(len(self.players)):
             self.run_n_games(n_games_per_rotation, rounds_per_game)
             self.players = [self.players.pop()] + self.players
-        print('Done!')
 
     def run_n_games_and_permute_players(self, n, rounds_per_game=3):
         pass

@@ -13,7 +13,7 @@ def main():
         DefaultStrategy('Lisa'),
     ]
     game_manager = GameManager(strategies)
-    game_manager.run_n_games(1)
+    game_manager.run_n_games_and_rotate_players(1000)
     game_manager.plot_wins('wins.png')
 
 
