@@ -17,6 +17,7 @@ class GameManager:
             board.play_round()
         stats = board.get_stats()
         board.print_end_game_summary()
+        board.hard_reset_players()
         self.stats.append(stats)
 
     def run_n_games(self, n, rounds_per_game=3):

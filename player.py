@@ -60,7 +60,7 @@ class Player:
         self.killed = True
         return dropped_tiles
 
-    def reset(self):
+    def soft_reset(self):
         self.tiles = []
         self.position = 0
         self.direction = 1
@@ -68,6 +68,10 @@ class Player:
         self.finished = False
         self.deaths.append(self.killed)
         self.killed = False
+
+    def hard_reset(self):
+        self.soft_reset()
+        self.bank = 0
 
     @player_must_be_finished
     def get_tile_values(self):

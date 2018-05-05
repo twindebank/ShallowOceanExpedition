@@ -10,7 +10,7 @@ def main():
         Player('Tati', DefaultStrategy())
     ]
     game_manager = GameManager(players)
-    game_manager.run_n_games(100)
+    game_manager.run_n_games(1000)
     game_manager.plot_wins()
 
 

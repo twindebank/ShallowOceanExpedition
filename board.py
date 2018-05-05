@@ -121,15 +121,19 @@ class Board:
         self._reduce_board(ordered_stacks)
         self.round_number += 1
         self.oxygen = self.original_oxygen
-        self._reset_players()
+        self._soft_reset_players()
         print(f'Round {self.round_number} over, player summaries:')
         for player in self.players:
             print(player)
         raise RoundOver('Round over!')
 
-    def _reset_players(self):
+    def _soft_reset_players(self):
         for player in self.players:
-            player.reset()
+            player.soft_reset()
+
+    def hard_reset_players(self):
+        for player in self.players:
+            player.hard_reset()
 
     def _reduce_board(self, ordered_stacks):
         # need to process stacks of tiles into new single tiles
