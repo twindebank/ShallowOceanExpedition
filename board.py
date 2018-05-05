@@ -34,7 +34,7 @@ class Board:
             print(player)
 
     def take_turn(self):
-        if self.current_player.playing:
+        if not self.current_player.finished:
             print(f"\nIt's {self.current_player.name}'s go!")
             self._reduce_ox(self.current_player.count_tiles())
             self._apply_current_player_direction_strategy()
@@ -64,7 +64,7 @@ class Board:
             self.tiles[self.current_player_position] = dropped
 
     def has_players(self):
-        return bool(sum(player.playing for player in self.players))
+        return bool(sum(not player.finished for player in self.players))
 
     def _advance_current_player(self):
         roll = self.current_player.roll()
@@ -72,6 +72,7 @@ class Board:
         self.current_player_position = new_position
         self.current_player.n_turn += 1
         if self.current_player_position == 0:
+            self.current_player.finished = True
             self.current_player.bank_tiles()
             return None
         return self.tiles[new_position]
@@ -117,16 +118,15 @@ class Board:
         print('\nOxygen depleted!')
         dropped_tiles = {}
         for player in self.players:
-            if player.playing:
+            if not player.finished:
                 dropped = player.kill()
                 dropped_tiles[player.position] = TileStack(dropped)
-            else:
-                player.reset_player()
 
         ordered_stacks = [dropped_tiles[player_n] for player_n in sorted(dropped_tiles, reverse=True)]
         self.reduce_board(ordered_stacks)
         self.round_number += 1
         self.oxygen = self.original_oxygen
+        self.reset_players()
         print('Round over, player summaries:')
         for player in self.players:
             print(player)
@@ -134,6 +134,10 @@ class Board:
         # TODO: sort out ordering of players for new round
         # TODO: sort out resetting of players for new round
         #   - board needs to reset all players regardless of wether ox runs out or not
+
+    def reset_players(self):
+        for player in self.players:
+            player.reset(game_finished=True)
 
     def reduce_board(self, ordered_stacks):
         # need to process stacks of tiles into new single tiles
@@ -144,6 +148,15 @@ class Board:
         do_change = self.current_player.strategy.decide_direction()
         if do_change:
             self.current_player.change_direction()
+
+    def end_game_summary(self):
+        print('\nGame over!')
+        banks = {player.name: player.bank for player in self.players}
+        winner = max(banks, key=banks.get)
+        print(f'The winner is {winner} with a score of {banks[winner]}!!')
+        del banks[winner]
+        print(f'Other scores: {banks}')
+
 
 
 class Submarine:
@@ -165,6 +178,7 @@ class TileStack:
     def value(self):
         if self.__value is None:
             self.__value = sum([tile.value for tile in self._tiles])
+        return self.__value
 
     def __repr__(self):
         return f"""Level: {self.level}"""
@@ -199,7 +213,7 @@ class Tile:
 
 def player_must_be_finished(attempted_func):
     def raise_if_cheating(player, *args, **kwargs):
-        if player.playing:
+        if not player.finished:
             raise Cheating('This method cannot be called whilst the player is playing!')
         else:
             return attempted_func(player, *args, **kwargs)
@@ -216,10 +230,11 @@ class Player:
         self.bank = 0
         self.n_turn = 0
         self.strategy = strategy(self, board)
+        self.finished = False
 
     @property
-    def playing(self):
-        return False if self.position == 0 and self.direction == -1 else True
+    def is_home(self):
+        return True if self.position == 0 and self.direction == -1 else False
 
     def roll(self):
         roll = (randint(1, 3) + randint(1, 3))
@@ -239,7 +254,7 @@ class Player:
 
     def summarise_tiles(self):
         tile_levels = [tile.level for tile in self.tiles]
-        return {level: tile_levels.count(level) for level in sorted(set(tile_levels))}
+        return {level: tile_levels.count(level) for level in set(tile_levels)}
 
     def change_direction(self):
         print(f'- {self.name} changed direction!')
@@ -250,14 +265,15 @@ class Player:
     def kill(self):
         print(f"- {self.name} didn't make it, they lost {self.count_tiles()} tiles :-(")
         dropped_tiles = self.tiles
-        self.reset_player()
+        self.reset()
         return dropped_tiles
 
-    def reset_player(self):
+    def reset(self, game_finished=False):
         self.tiles = []
         self.position = 0
         self.direction = 1
         self.n_turn = 0
+        self.finished = not game_finished
 
     @player_must_be_finished
     def get_tile_values(self):
@@ -268,6 +284,7 @@ class Player:
         print(f"{self.name} made it!!")
         value = self.get_tile_values()
         self.bank += value
+        self.finished = True
 
     def __str__(self):
         return f"""- Summary for {self.name}:
@@ -336,6 +353,7 @@ def main():
     play_round(board)
     play_round(board)
     play_round(board)
+    board.end_game_summary()
     print('Done!')
 
 
