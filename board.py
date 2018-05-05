@@ -1,7 +1,6 @@
 from itertools import cycle
 
-from example_game import main
-from exceptions import RoundOver, Cheating
+from exceptions import RoundOver
 from tiles import Submarine, TileStack, Tile
 
 
@@ -169,14 +168,6 @@ class Board:
         return player, board, other_players
 
 
-def player_must_be_finished(attempted_func):
-    def raise_if_cheating(player, *args, **kwargs):
-        if not player.finished:
-            raise Cheating('This method cannot be called whilst the player is playing!')
-        else:
-            return attempted_func(player, *args, **kwargs)
-
-    return raise_if_cheating
 
 
 

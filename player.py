@@ -1,8 +1,15 @@
 from random import randint
 
-from board import player_must_be_finished
 from exceptions import Cheating
 
+def player_must_be_finished(attempted_func):
+    def raise_if_cheating(player, *args, **kwargs):
+        if not player.finished:
+            raise Cheating('This method cannot be called whilst the player is playing!')
+        else:
+            return attempted_func(player, *args, **kwargs)
+
+    return raise_if_cheating
 
 class Player:
     def __init__(self, name, strategy):
@@ -79,3 +86,5 @@ class Player:
 
     def __repr__(self):
         return self.name
+
+
