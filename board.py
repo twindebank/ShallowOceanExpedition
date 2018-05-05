@@ -22,17 +22,14 @@ class Board:
         for player in players:
             print(player)
 
-    def play_n_rounds(self, n):
-        for _ in range(n):
-            self._play_round()
-        self._end_game_summary()
 
-    def _play_round(self):
+    def play_round(self):
         while True:
             try:
                 self._take_turn()
             except RoundOver:
                 break
+                # return stats
 
     def _take_turn(self):
         if not self.current_player.finished:
@@ -162,7 +159,7 @@ class Board:
         }
         return player, board, other_players
 
-    def _end_game_summary(self):
+    def print_end_game_summary(self):
         print('\nGame over!')
         banks = {player.name: player.bank for player in self.players}
         winner = max(banks, key=banks.get)
