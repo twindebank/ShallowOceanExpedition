@@ -1,4 +1,6 @@
 class DefaultStrategy:
+    def __init__(self, player_name):
+        self.player_name = player_name
     @staticmethod
     def decide_direction(player, board, others):
         # should receive read only views of board and player

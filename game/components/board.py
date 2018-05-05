@@ -1,7 +1,7 @@
 from itertools import cycle
 
-from exceptions import RoundOver
-from tiles import Submarine, TileStack, Tile
+from game.exceptions import RoundOver
+from game.components.tiles import Submarine, TileStack, Tile
 
 
 class Board:

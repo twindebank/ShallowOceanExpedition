@@ -1,13 +1,15 @@
-from board import Board
+from game.components.board import Board
 from altair import Chart
 from pandas import DataFrame
 
 # todo: custom logging levels: turn, round, game
 # todo: attatch name to strategy instead of player so only strategy has to be written
+from game.components.player import Player
+
 
 class GameManager:
-    def __init__(self, players, **board_params):
-        self.players = players
+    def __init__(self, strategies, **board_params):
+        self.players = [Player(strategy) for strategy in strategies]
         self.board_params = board_params
         self.stats = []
 
@@ -36,7 +38,7 @@ class GameManager:
     def run_n_games_with_all_player_combinations(self, n, rounds_per_game=3):
         pass
 
-    def plot_wins(self):
+    def plot_wins(self, save_path):
         wins = {}
         for game_stat in self.stats:
             for player_name, player_stat in game_stat.items():
@@ -50,4 +52,4 @@ class GameManager:
             'Wins': list(wins.values())
         })
         plot = Chart(wins_df).mark_bar().encode(x='Players', y='Wins')
-        plot.save('wins.png')
+        plot.save(save_path)

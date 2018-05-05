@@ -1,6 +1,6 @@
 from random import randint
 
-from exceptions import Cheating
+from game.exceptions import Cheating
 
 def player_must_be_finished(attempted_func):
     def raise_if_cheating(player, *args, **kwargs):
@@ -12,8 +12,8 @@ def player_must_be_finished(attempted_func):
     return raise_if_cheating
 
 class Player:
-    def __init__(self, name, strategy):
-        self.name = name
+    def __init__(self, strategy):
+        self.name = strategy.player_name
         self.position = 0
         self.tiles = []
         self.direction = 1
