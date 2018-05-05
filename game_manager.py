@@ -33,3 +33,6 @@ class GameManager:
 
     def run_n_games_with_all_player_combinations(self, n, rounds_per_game=3):
         pass
+
+    def plot_wins(self):
+        pass
