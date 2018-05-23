@@ -1,3 +1,4 @@
+matplotlib
 tqdm
 altair==2.0.1
 entrypoints==0.2.3
