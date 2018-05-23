@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ShallowOceanExpedition",
-    version="0.1.2",
+    version="0.1.3",
     author="Theo Windebank",
     author_email="windebank.theo@gmail.com",
     description="Simulate runs of a game with the ability to define custom strategies.",
