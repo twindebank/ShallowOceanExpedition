@@ -18,4 +18,15 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ),
+    install_requires = [
+        'cycler==0.10.0'
+        'kiwisolver==1.0.1'
+        'matplotlib==2.2.2'
+        'numpy==1.14.3'
+        'pyparsing==2.2.0'
+        'python-dateutil==2.7.3'
+        'pytz==2018.4'
+        'six==1.11.0'
+        'tqdm==4.23.4'
+    ]
 )
