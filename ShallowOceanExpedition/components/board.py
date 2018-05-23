@@ -1,9 +1,9 @@
 from itertools import cycle
 
-from game.components.player import Player
-from game.utils.exceptions import RoundOver
-from game.components.tiles import Submarine, TileStack, Tile
-from game.utils.logging import logger, GAME, TURN, ROUND
+from ShallowOceanExpedition.components.player import Player
+from ShallowOceanExpedition.utils.exceptions import RoundOver
+from ShallowOceanExpedition.components.tiles import Submarine, TileStack, Tile
+from ShallowOceanExpedition.utils.logging import logger, GAME, TURN, ROUND
 
 
 class Board:
@@ -20,7 +20,8 @@ class Board:
         self.oxygen = oxygen
         self.player_cycle = cycle(self.players)
         self.current_player = next(self.player_cycle)
-        logger.log(GAME, f'Welcome players {", ".join([player.name for player in self.players])} for round {self.round_number}!!')
+        logger.log(GAME, f'Welcome players {", ".join([player.name for player in self.players])} for round '
+                         f'{self.round_number}!!')
         for player in self.players:
             logger.log(GAME, player)
 

@@ -1,7 +1,7 @@
 from random import randint
 
-from game.utils.exceptions import Cheating
-from game.utils.logging import logger, TURN, ROUND
+from ShallowOceanExpedition.utils.exceptions import Cheating
+from ShallowOceanExpedition.utils.logging import logger, TURN, ROUND
 
 
 def player_must_be_finished(attempted_func):
