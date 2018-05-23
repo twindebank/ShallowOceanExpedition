@@ -4,6 +4,7 @@ from ShallowOceanExpedition.utils.logging import logger, SIM
 
 logger.setLevel(SIM)
 
+
 def main():
     strategies = [
         DefaultStrategy('Theo'),
