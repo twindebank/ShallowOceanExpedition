@@ -29,6 +29,9 @@ class DefaultStrategy:
 
     @staticmethod
     def tile_drop(player, board, others):
-        if player['position'] > 5 and player['n_tiles'] > 1 and board['oxygen'] < 5:
-            return True
-        return False
+        if player['position'] > 5 and len(player['tiles']) > 1 and board['oxygen'] < 5:
+            tile_levels = list(player['tiles'].keys())
+            flat_tile_levels = [level if isinstance(level, int) else sum(level) for level in tile_levels]
+            min_tile_level = tile_levels[flat_tile_levels.index(min(flat_tile_levels))]
+            return True, min_tile_level
+        return False, None
