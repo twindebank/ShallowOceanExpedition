@@ -1,13 +1,13 @@
 from random import choice
 
 
-class Submarine:
+class Home:
     def __init__(self):
         self.value = None
-        self.level = 'Submarine'
+        self.level = 'Home'
 
     def __repr__(self):
-        return """Submarine"""
+        return """Home"""
 
 
 class TileStack:

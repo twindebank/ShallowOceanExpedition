@@ -2,7 +2,7 @@ from itertools import cycle
 
 from ShallowOceanExpedition.components.player import Player
 from ShallowOceanExpedition.utils.exceptions import RoundOver
-from ShallowOceanExpedition.components.tiles import Submarine, TileStack, Tile
+from ShallowOceanExpedition.components.tiles import Home, TileStack, Tile
 from ShallowOceanExpedition.utils.logging import logger, GAME, TURN, ROUND
 
 
@@ -10,7 +10,7 @@ class Board:
     def __init__(self, strategies, oxygen=25, n_level_1=5, n_level_2=5, n_level_3=5, n_level_4=5):
         self.players = [Player(strategy) for strategy in strategies]
         self.tiles = \
-            [Submarine()] + \
+            [Home()] + \
             [Tile(1)] * n_level_1 + \
             [Tile(2)] * n_level_2 + \
             [Tile(3)] * n_level_3 + \

@@ -20,12 +20,18 @@ Create a class inheriting from `game.components.strategy.DefaultStrategy` and ov
 
 ## ToDo
 - More documentation/examples of custom strategies
-- Package the module so it can be installed
+    * include examples of dicts to work with
+- Handle results when tie
+- account for cases where nobody wins
 - Tests
 - Docstrings
 - Add more kinds of plots
-- account for cases where nobody wins
+    * plots of 1st/2nd/3rd per player
 - add automated testing in setup.py
+- add GameServer for strategies to be submitted and ranked against others
+    * server holds number of stategies (can be more than 6)
+    * on submission of new strategies, server does all perms and combs of players (up to 6 players per game) and stores total number of wins
+- profile code and speed up
 
 ## Notes
 Install branch with pip install https://github.com/twindebank/ShallowOceanExpedition/archive/BRANCH.zip --upgrade
