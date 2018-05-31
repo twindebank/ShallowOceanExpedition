@@ -64,9 +64,9 @@ class Board:
             logger.log(TURN, f'- {self.current_player.name} picked up a level {landed_on.level} tile!!')
 
     def _apply_current_player_drop_strategy(self):
-        do_drop = self.current_player.strategy.tile_drop(*self._summarise_game())
+        do_drop, tile_level = self.current_player.strategy.tile_drop(*self._summarise_game())
         if do_drop:
-            dropped = self.current_player.drop_tile()
+            dropped = self.current_player.drop_tile(tile_level)
             self.tiles[self.current_player.position] = dropped
 
     def _apply_current_player_direction_strategy(self):
@@ -152,15 +152,16 @@ class Board:
         }
         board = {
             'tiles': self._summarise_tile_levels(),
-            'round_number': self.round_number
+            'round_number': self.round_number,
+            'oxygen': self.oxygen
         }
         other_players = {
             player.name: {
-                'tiles': self.current_player.summarise_tiles(),
-                'position': self.current_player.position,
-                'bank': self.current_player.bank,
-                'changed_direction': True if self.current_player.direction > 0 else False,
-                'turn_number': self.current_player.n_turn
+                'tiles': player.summarise_tiles(),
+                'position': player.position,
+                'bank': player.bank,
+                'changed_direction': True if player.direction > 0 else False,
+                'turn_number': player.n_turn
             } for player in self._get_other_players()
         }
         return player, board, other_players
