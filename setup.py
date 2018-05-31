@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 if __name__ == "__main__":
     setup(
         name="ShallowOceanExpedition",
-        version="0.1.4",
+        version="0.1.5",
         author="Theo Windebank",
         author_email="windebank.theo@gmail.com",
         description="Simulate runs of a game with the ability to define custom strategies.",
