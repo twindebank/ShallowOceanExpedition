@@ -25,3 +25,7 @@ Create a class inheriting from `game.components.strategy.DefaultStrategy` and ov
 - Docstrings
 - Add more kinds of plots
 - account for cases where nobody wins
+- add automated testing in setup.py
+
+## Notes
+Install branch with pip install https://github.com/twindebank/ShallowOceanExpedition/archive/BRANCH.zip --upgrade
