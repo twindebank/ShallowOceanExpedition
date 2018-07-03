@@ -138,7 +138,6 @@ class Board:
             player.hard_reset()
 
     def _reduce_board(self, ordered_stacks):
-        # need to process stacks of tiles into new single tiles
         self.tiles = [tile for tile in self.tiles if tile.level != (0,)]
         self.tiles.extend(ordered_stacks)
 
@@ -183,13 +182,12 @@ class Board:
                 self._next_player()
 
     def get_stats(self):
-        banks = {player.name: player.bank for player in self.players}
-        ranks = sorted(banks, key=banks.get, reverse=True)
+        banks = sorted([player.bank for player in self.players], reverse=True)
         stats = {}
         for player in self.players:
             stats[player.name] = {
                 'score': player.bank,
-                'rank': ranks.index(player.name),
+                'rank': banks.index(player.bank)+1,
                 'deaths': player.deaths
             }
         return stats
