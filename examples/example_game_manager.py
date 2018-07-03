@@ -7,13 +7,10 @@ logger.setLevel(SIM)
 
 def main():
     strategies = [
-        DefaultStrategy('Theo'),
-        DefaultStrategy('Tati'),
-        DefaultStrategy('Jon'),
-        DefaultStrategy('Gabriel'),
-        DefaultStrategy('Alastair'),
-        DefaultStrategy('Maria'),
-        DefaultStrategy('Lisa'),
+        DefaultStrategy('Player1'),
+        DefaultStrategy('Player2'),
+        DefaultStrategy('Player3'),
+        DefaultStrategy('Player4')
     ]
     game_manager = GameManager(strategies)
     game_manager.run_n_games_and_rotate_strategies(10000)

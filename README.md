@@ -19,8 +19,6 @@ Create a class inheriting from `game.components.strategy.DefaultStrategy` and ov
 
 
 ## ToDo/Bugs
-- stop case of empty tuple tiles
-- handle 'nested' tile stacks better
 - account for cases where nobody wins
 - Handle results when tie
 - profile code and speed up
