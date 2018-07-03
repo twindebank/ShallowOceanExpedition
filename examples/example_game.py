@@ -1,18 +1,16 @@
-from game.components.board import Board
-from game.components.strategy import DefaultStrategy
-from game.utils.logging import logger, TURN
+from ShallowOceanExpedition.components.board import Board
+from ShallowOceanExpedition.components.strategy import DefaultStrategy
+from ShallowOceanExpedition.utils.logging import logger, TURN
 
 logger.setLevel(TURN)
 
+
 def main():
     strategies = [
-        DefaultStrategy('Theo'),
-        DefaultStrategy('Tati'),
-        DefaultStrategy('Jon'),
-        DefaultStrategy('Gabriel'),
-        DefaultStrategy('Alastair'),
-        DefaultStrategy('Maria'),
-        DefaultStrategy('Lisa'),
+        DefaultStrategy('Player1'),
+        DefaultStrategy('Player2'),
+        DefaultStrategy('Player3'),
+        DefaultStrategy('Player4'),
     ]
     board = Board(strategies)
     for _ in range(3):

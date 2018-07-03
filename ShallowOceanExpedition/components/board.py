@@ -2,7 +2,7 @@ from itertools import cycle
 
 from ShallowOceanExpedition.components.player import Player
 from ShallowOceanExpedition.utils.exceptions import RoundOver
-from ShallowOceanExpedition.components.tiles import Submarine, TileStack, Tile
+from ShallowOceanExpedition.components.tiles import Home, TileStack, Tile
 from ShallowOceanExpedition.utils.logging import logger, GAME, TURN, ROUND
 
 
@@ -10,7 +10,7 @@ class Board:
     def __init__(self, strategies, oxygen=25, n_level_1=5, n_level_2=5, n_level_3=5, n_level_4=5):
         self.players = [Player(strategy) for strategy in strategies]
         self.tiles = \
-            [Submarine()] + \
+            [Home()] + \
             [Tile(1)] * n_level_1 + \
             [Tile(2)] * n_level_2 + \
             [Tile(3)] * n_level_3 + \
@@ -40,7 +40,7 @@ class Board:
             self._apply_current_player_direction_strategy()
             landed_on = self._advance_current_player()
             if landed_on is not None:
-                if landed_on.level == 0:
+                if landed_on.level == (0,):
                     self._apply_current_player_drop_strategy()
                 else:
                     self._apply_current_player_collect_strategy(landed_on)
@@ -64,9 +64,9 @@ class Board:
             logger.log(TURN, f'- {self.current_player.name} picked up a level {landed_on.level} tile!!')
 
     def _apply_current_player_drop_strategy(self):
-        do_drop = self.current_player.strategy.tile_drop(*self._summarise_game())
+        do_drop, tile_level = self.current_player.strategy.tile_drop(*self._summarise_game())
         if do_drop:
-            dropped = self.current_player.drop_tile()
+            dropped = self.current_player.drop_tile(tile_level)
             self.tiles[self.current_player.position] = dropped
 
     def _apply_current_player_direction_strategy(self):
@@ -139,7 +139,7 @@ class Board:
 
     def _reduce_board(self, ordered_stacks):
         # need to process stacks of tiles into new single tiles
-        self.tiles = [tile for tile in self.tiles if tile.level != 0]
+        self.tiles = [tile for tile in self.tiles if tile.level != (0,)]
         self.tiles.extend(ordered_stacks)
 
     def _summarise_game(self):
@@ -152,15 +152,16 @@ class Board:
         }
         board = {
             'tiles': self._summarise_tile_levels(),
-            'round_number': self.round_number
+            'round_number': self.round_number,
+            'oxygen': self.oxygen
         }
         other_players = {
             player.name: {
-                'tiles': self.current_player.summarise_tiles(),
-                'position': self.current_player.position,
-                'bank': self.current_player.bank,
-                'changed_direction': True if self.current_player.direction > 0 else False,
-                'turn_number': self.current_player.n_turn
+                'tiles': player.summarise_tiles(),
+                'position': player.position,
+                'bank': player.bank,
+                'changed_direction': True if player.direction > 0 else False,
+                'turn_number': player.n_turn
             } for player in self._get_other_players()
         }
         return player, board, other_players

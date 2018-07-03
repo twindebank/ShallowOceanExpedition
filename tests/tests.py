@@ -20,4 +20,6 @@
 
 # test fail picking up submarine tile
 
+# test cant pick up 0 tile
+
 # loads more

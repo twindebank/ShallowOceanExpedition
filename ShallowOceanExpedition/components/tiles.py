@@ -1,19 +1,22 @@
 from random import choice
 
 
-class Submarine:
+class Home:
     def __init__(self):
         self.value = None
-        self.level = 'Submarine'
+        self.level = 'Home'
 
     def __repr__(self):
-        return """Submarine"""
+        return """Home"""
 
 
 class TileStack:
     def __init__(self, tiles):
         self._tiles = tiles
-        self.level = tuple(tile.level for tile in tiles)
+        level = []
+        for tile in tiles:
+            level.extend(tile.level)
+        self.level = tuple(level)
         self.__value = None
 
     @property
@@ -28,7 +31,11 @@ class TileStack:
 
 class Tile:
     def __init__(self, level):
-        self.level = level
+        """
+        properties:
+            level (tuple): level of the tile
+        """
+        self.level = level,
         self.__value = None
         if level == 0:
             self.value_range = [0]

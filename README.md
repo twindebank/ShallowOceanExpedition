@@ -18,14 +18,28 @@ run a single game with a more verbose output.
 Create a class inheriting from `game.components.strategy.DefaultStrategy` and override the methods.
 
 
-## ToDo
+## ToDo/Bugs
+- stop case of empty tuple tiles
+- handle 'nested' tile stacks better
+- account for cases where nobody wins
+- Handle results when tie
+- profile code and speed up
+- tests
+
+
+## Planned Features
 - More documentation/examples of custom strategies
-- Package the module so it can be installed
-- Tests
+    * include examples of dicts to work with
+- docs of logging level
 - Docstrings
 - Add more kinds of plots
-- account for cases where nobody wins
+    * plots of 1st/2nd/3rd per player
 - add automated testing in setup.py
+- add GameServer for strategies to be submitted and ranked against others
+    * server holds number of stategies (can be more than 6)
+    * on submission of new strategies, server does all perms and combs of players (up to 6 players per game) and stores total number of wins
+- stats per player averaged over all games eg times died in round one, times died in round two, number of times dropped tiles etc
 
 ## Notes
-Install branch with pip install https://github.com/twindebank/ShallowOceanExpedition/archive/BRANCH.zip --upgrade
+Install branch with pip install git+https://github.com/twindebank/ShallowOceanExpedition@BRANCH 
+

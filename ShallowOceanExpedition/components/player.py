@@ -41,8 +41,10 @@ class Player:
     def collect_tile(self, tile):
         self.tiles.append(tile)
 
-    def drop_tile(self, index):
-        return self.tiles.pop(index)
+    def drop_tile(self, tile_level):
+        """Automatically drop lowest"""
+        tile_index_to_drop = [tile.level for tile in self.tiles].index(tile_level)
+        return self.tiles.pop(tile_index_to_drop)
 
     def count_tiles(self):
         return len(self.tiles)
