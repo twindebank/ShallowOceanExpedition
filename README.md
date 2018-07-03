@@ -19,10 +19,8 @@ Create a class inheriting from `game.components.strategy.DefaultStrategy` and ov
 
 
 ## ToDo/Bugs
-- account for cases where nobody wins
-- Handle results when tie
-- profile code and speed up
 - tests
+- profile code and speed up
 
 
 ## Planned Features

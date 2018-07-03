@@ -12,6 +12,8 @@ class Home:
 
 class TileStack:
     def __init__(self, tiles):
+        if not tiles:
+            raise ValueError("No tiles given.")
         self._tiles = tiles
         level = []
         for tile in tiles:
@@ -37,9 +39,7 @@ class Tile:
         """
         self.level = level,
         self.__value = None
-        if level == 0:
-            self.value_range = [0]
-        elif level == 1:
+        if level == 1:
             self.value_range = range(0, 5)
         elif level == 2:
             self.value_range = range(5, 10)
