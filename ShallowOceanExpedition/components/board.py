@@ -123,19 +123,15 @@ class Board:
         self._reduce_board(ordered_stacks)
         self.round_number += 1
         self.oxygen = self.original_oxygen
-        self._soft_reset_players()
+        self._end_player_rounds()
         logger.log(ROUND, f'Round {self.round_number} over, player summaries:')
         for player in self.players:
             logger.log(ROUND, player)
         raise RoundOver('Round over!')
 
-    def _soft_reset_players(self):
+    def _end_player_rounds(self):
         for player in self.players:
-            player.soft_reset()
-
-    def hard_reset_players(self):
-        for player in self.players:
-            player.hard_reset()
+            player.end_round()
 
     def _reduce_board(self, ordered_stacks):
         self.tiles = [tile for tile in self.tiles if tile.level != (0,)]
@@ -187,7 +183,9 @@ class Board:
         for player in self.players:
             stats[player.name] = {
                 'score': player.bank,
-                'rank': banks.index(player.bank)+1,
+                'rank': banks.index(player.bank)+1 if player.bank > 0 else None,
                 'deaths': player.deaths
             }
+            if len(player.deaths) > 3:
+                print('here')
         return stats

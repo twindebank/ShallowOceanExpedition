@@ -20,7 +20,6 @@ class GameManager:
             board.play_round()
         stats = board.get_stats()
         board.print_end_game_summary()
-        board.hard_reset_players()
         self.stats.append(stats)
         self.plot_title = f'{n} rounds'
 
