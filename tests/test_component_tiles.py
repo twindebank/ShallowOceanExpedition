@@ -1,6 +1,6 @@
 import pytest
 
-from ShallowOceanExpedition.components.tiles import Tile, TileStack, Home
+from ShallowOceanExpedition.components.tiles import Tile, TileStack, Home, BlankTile
 
 
 def test_Tile_value_fail():
@@ -62,13 +62,13 @@ def test_TileStack():
     assert tilestack.level == (1,)
     assert tilestack._TileStack__value is None
     assert tilestack.value == 1
-    assert tilestack._TileStack__value == 1
+    assert tilestack._TileStack__value == tilestack.value
 
     tilestack = TileStack([MockTile(1), MockTile(2), MockTile(3)])
     assert tilestack.level == (1, 2, 3)
     assert tilestack._TileStack__value is None
     assert tilestack.value == 1 + 2 + 3
-    assert tilestack._TileStack__value == 1 + 2 + 3
+    assert tilestack._TileStack__value == tilestack.value
 
 
 class MockMultiTile:
@@ -82,22 +82,29 @@ def test_TileStack_multi():
     assert tilestack.level == (1, 2, 3)
     assert tilestack._TileStack__value is None
     assert tilestack.value == 1 + 2 + 3
-    assert tilestack._TileStack__value == 1 + 2 + 3
+    assert tilestack._TileStack__value == tilestack.value
 
     tilestack = TileStack([MockMultiTile((1, 2, 3)), MockTile(1)])
     assert tilestack.level == (1, 2, 3, 1)
     assert tilestack._TileStack__value is None
     assert tilestack.value == 1 + 2 + 3 + 1
-    assert tilestack._TileStack__value == 1 + 2 + 3 + 1
+    assert tilestack._TileStack__value == tilestack.value
 
     tilestack = TileStack([MockMultiTile((1, 2, 3)), MockMultiTile((1, 2, 3))])
     assert tilestack.level == (1, 2, 3, 1, 2, 3)
     assert tilestack._TileStack__value is None
     assert tilestack.value == 1 + 2 + 3 + 1 + 2 + 3
-    assert tilestack._TileStack__value == 1 + 2 + 3 + 1 + 2 + 3
+    assert tilestack._TileStack__value == tilestack.value
 
 
 def test_Home():
     home = Home()
     assert home.level == 'Home'
     assert home.value is None
+
+
+def test_BlankTile():
+    blank = BlankTile()
+    assert blank.level is None
+    with pytest.raises(ValueError):
+        blank.value
