@@ -1,6 +1,6 @@
 import pytest
 
-from ShallowOceanExpedition.components.tiles import Tile, TileStack
+from ShallowOceanExpedition.components.tiles import Tile, TileStack, Home
 
 
 def test_Tile_value_fail():
@@ -57,7 +57,7 @@ class MockTile:
         self.level = (v,)
 
 
-def test_TileStack_level_and_value():
+def test_TileStack():
     tilestack = TileStack([MockTile(1)])
     assert tilestack.level == (1,)
     assert tilestack._TileStack__value is None
@@ -95,3 +95,9 @@ def test_TileStack_multi():
     assert tilestack._TileStack__value is None
     assert tilestack.value == 1 + 2 + 3 + 1 + 2 + 3
     assert tilestack._TileStack__value == 1 + 2 + 3 + 1 + 2 + 3
+
+
+def test_Home():
+    home = Home()
+    assert home.level == 'Home'
+    assert home.value is None

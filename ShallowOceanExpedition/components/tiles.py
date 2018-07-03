@@ -6,9 +6,6 @@ class Home:
         self.value = None
         self.level = 'Home'
 
-    def __repr__(self):
-        return """Home"""
-
 
 class TileStack:
     def __init__(self, tiles):
@@ -26,9 +23,6 @@ class TileStack:
         if self.__value is None:
             self.__value = sum([tile.value for tile in self._tiles])
         return self.__value
-
-    def __repr__(self):
-        return f"""Level: {self.level}"""
 
 
 class Tile:
@@ -55,6 +49,3 @@ class Tile:
         if self.__value is None:
             self.__value = choice(self.value_range)
         return self.__value
-
-    def __repr__(self):
-        return f"""Level: {self.level}"""
