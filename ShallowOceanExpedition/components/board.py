@@ -2,7 +2,7 @@ from itertools import cycle
 
 from ShallowOceanExpedition.components.player import Player
 from ShallowOceanExpedition.utils.exceptions import RoundOver
-from ShallowOceanExpedition.components.tiles import Home, TileStack, Tile
+from ShallowOceanExpedition.components.tiles import Home, TileStack, Tile, BlankTile
 from ShallowOceanExpedition.utils.logging import logger, GAME, TURN, ROUND
 
 
@@ -40,7 +40,7 @@ class Board:
             self._apply_current_player_direction_strategy()
             landed_on = self._advance_current_player()
             if landed_on is not None:
-                if landed_on.level == (0,):
+                if landed_on.level is None:
                     self._apply_current_player_drop_strategy()
                 else:
                     self._apply_current_player_collect_strategy(landed_on)
@@ -60,7 +60,7 @@ class Board:
         do_pickup = self.current_player.strategy.tile_collect(*self._summarise_game())
         if do_pickup:
             self.current_player.collect_tile(landed_on)
-            self.tiles[self.current_player.position] = Tile(0)
+            self.tiles[self.current_player.position] = BlankTile()
             logger.log(TURN, f'- {self.current_player.name} picked up a level {landed_on.level} tile!!')
 
     def _apply_current_player_drop_strategy(self):
@@ -117,7 +117,8 @@ class Board:
         for player in self.players:
             if not player.finished:
                 dropped = player.kill()
-                dropped_tiles[player.position] = TileStack(dropped)
+                if dropped:
+                    dropped_tiles[player.position] = TileStack(dropped)
 
         ordered_stacks = [dropped_tiles[player_n] for player_n in sorted(dropped_tiles, reverse=True)]
         self._reduce_board(ordered_stacks)

@@ -1,5 +1,6 @@
 from random import randint
 
+from ShallowOceanExpedition.components.tiles import BlankTile
 from ShallowOceanExpedition.utils.exceptions import Cheating
 from ShallowOceanExpedition.utils.logging import logger, TURN, ROUND
 
@@ -39,6 +40,8 @@ class Player:
         return self.direction * moves
 
     def collect_tile(self, tile):
+        if isinstance(tile, BlankTile):
+            raise ValueError('Cant pick up blank tile.')
         self.tiles.append(tile)
 
     def drop_tile(self, tile_level):
