@@ -42,3 +42,4 @@ Create a class inheriting from `game.components.strategy.DefaultStrategy` and ov
 
 ## Notes
 Install branch with pip install git+https://github.com/twindebank/ShallowOceanExpedition@BRANCH 
+
