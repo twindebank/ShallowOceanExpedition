@@ -40,12 +40,13 @@ class Player:
         return self.direction * moves
 
     def collect_tile(self, tile):
-        if isinstance(tile, BlankTile):
+        if tile.level is None:
             raise ValueError('Cant pick up blank tile.')
         self.tiles.append(tile)
 
     def drop_tile(self, tile_level):
-        """Automatically drop lowest"""
+        if not self.tiles:
+            raise ValueError('No tiles to drop.')
         tile_index_to_drop = [tile.level for tile in self.tiles].index(tile_level)
         return self.tiles.pop(tile_index_to_drop)
 
@@ -63,6 +64,8 @@ class Player:
         self.direction = -1
 
     def kill(self):
+        if self.killed:
+            raise Cheating('Player already dead.')
         logger.log(ROUND, f"- {self.name} didn't make it, they lost {self.count_tiles()} tiles :-(")
         dropped_tiles = self.tiles
         self.killed = True
