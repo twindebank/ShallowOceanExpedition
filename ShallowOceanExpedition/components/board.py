@@ -40,7 +40,7 @@ class Board:
             self._apply_current_player_direction_strategy()
             landed_on = self._advance_current_player()
             if landed_on is not None:
-                if landed_on.level == 0:
+                if landed_on.level == (0,):
                     self._apply_current_player_drop_strategy()
                 else:
                     self._apply_current_player_collect_strategy(landed_on)
@@ -139,7 +139,7 @@ class Board:
 
     def _reduce_board(self, ordered_stacks):
         # need to process stacks of tiles into new single tiles
-        self.tiles = [tile for tile in self.tiles if tile.level != 0]
+        self.tiles = [tile for tile in self.tiles if tile.level != (0,)]
         self.tiles.extend(ordered_stacks)
 
     def _summarise_game(self):

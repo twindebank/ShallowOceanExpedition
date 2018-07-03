@@ -5,7 +5,7 @@ class DefaultStrategy:
     @staticmethod
     def decide_direction(player, board, others):
         # should receive read only views of board and player
-        if board['round_number'] in [0,1]:
+        if board['round_number'] in [0, 1]:
             # start risky
             change = True if player['turn_number'] > 2 and not player['changed_direction'] else False
         elif board['round_number'] == 2:
@@ -17,7 +17,7 @@ class DefaultStrategy:
 
     @staticmethod
     def tile_collect(player, board, others):
-        if board['round_number'] in [0,1]:
+        if board['round_number'] in [0, 1]:
             # start risky
             change = True if player['turn_number'] > 1 else False
         elif board['round_number'] == 2:
