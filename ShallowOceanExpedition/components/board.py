@@ -1,8 +1,8 @@
 from itertools import cycle
 
 from ShallowOceanExpedition.components.player import Player
-from ShallowOceanExpedition.utils.exceptions import RoundOver
 from ShallowOceanExpedition.components.tiles import Home, TileStack, Tile, BlankTile
+from ShallowOceanExpedition.utils.exceptions import RoundOver
 from ShallowOceanExpedition.utils.logging import logger, GAME, TURN, ROUND
 
 
@@ -51,7 +51,7 @@ class Board:
             self._next_player()
 
     def _has_players(self):
-        return bool(sum(not player.finished for player in self.players))
+        return bool(sum(not player.back_home for player in self.players))
 
     def _summarise_tile_levels(self):
         return [tile.level for tile in self.tiles]
@@ -80,8 +80,7 @@ class Board:
         self.current_player.position = new_position
         self.current_player.n_turn += 1
         if self.current_player.position == 0:
-            self.current_player.finished = True
-            self.current_player.bank_tiles()
+            self.current_player.reached_home()
             return None
         return self.tiles[new_position]
 
@@ -104,8 +103,9 @@ class Board:
 
     def _reduce_ox_by(self, n):
         if n > 0:
-            logger.log(TURN, f'- {self.current_player.name} has {self.current_player.count_tiles()} tile(s), oxygen reduced '
-                        f'from {self.oxygen} to {self.oxygen - n}')
+            logger.log(TURN,
+                       f'- {self.current_player.name} has {self.current_player.count_tiles()} tile(s), oxygen reduced '
+                       f'from {self.oxygen} to {self.oxygen - n}')
         self.oxygen -= n
         if self.oxygen < 0:
             logger.log(ROUND, '\nOxygen depleted!')
@@ -115,7 +115,7 @@ class Board:
         dropped_tiles = {}
         self._order_players()
         for player in self.players:
-            if not player.finished:
+            if not player.back_home:
                 dropped = player.kill()
                 if dropped:
                     dropped_tiles[player.position] = TileStack(dropped)
@@ -124,15 +124,11 @@ class Board:
         self._reduce_board(ordered_stacks)
         self.round_number += 1
         self.oxygen = self.original_oxygen
-        self._end_player_rounds()
         logger.log(ROUND, f'Round {self.round_number} over, player summaries:')
         for player in self.players:
             logger.log(ROUND, player)
+            player.back_home = False
         raise RoundOver('Round over!')
-
-    def _end_player_rounds(self):
-        for player in self.players:
-            player.end_round()
 
     def _reduce_board(self, ordered_stacks):
         self.tiles = [tile for tile in self.tiles if tile.level != (0,)]
@@ -184,7 +180,7 @@ class Board:
         for player in self.players:
             stats[player.name] = {
                 'score': player.bank,
-                'rank': banks.index(player.bank)+1 if player.bank > 0 else None,
+                'rank': banks.index(player.bank) + 1 if player.bank > 0 else None,
                 'deaths': player.deaths
             }
             if len(player.deaths) > 3:
