@@ -8,6 +8,8 @@ from ShallowOceanExpedition.utils.logging import logger, GAME, TURN, ROUND
 
 class Board:
     def __init__(self, strategies, oxygen=25, n_level_1=5, n_level_2=5, n_level_3=5, n_level_4=5):
+        if len(strategies) < 2:
+            raise ValueError('Must supply at least two strategies')
         self.players = [Player(strategy) for strategy in strategies]
         self.tiles = \
             [Home()] + \
