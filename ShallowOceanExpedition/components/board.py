@@ -2,7 +2,7 @@ from itertools import cycle
 
 from ShallowOceanExpedition.components.player import Player
 from ShallowOceanExpedition.components.tiles import Home, TileStack, Tile, BlankTile
-from ShallowOceanExpedition.utils.exceptions import RoundOver
+from ShallowOceanExpedition.utils.exceptions import RoundOver, Cheating
 from ShallowOceanExpedition.utils.logging import logger, GAME, TURN, ROUND
 
 
@@ -33,19 +33,20 @@ class Board:
                 self._take_turn()
             except RoundOver:
                 break
-                # return stats
 
     def _take_turn(self):
-        if not self.current_player.finished:
+        if not self.current_player.back_home:
             logger.log(TURN, f"\nIt's {self.current_player.name}'s go!")
             self._reduce_ox_by(self.current_player.count_tiles())
             self._apply_current_player_direction_strategy()
             landed_on = self._advance_current_player()
-            if landed_on is not None:
+            if isinstance(landed_on, Home):
+                self.current_player.reached_home()
+            else:
                 if landed_on.level is None:
                     self._apply_current_player_drop_strategy()
                 else:
-                    self._apply_current_player_collect_strategy(landed_on)
+                    self._apply_current_player_collect_strategy()
             logger.log(TURN, self.current_player)
         if not self._has_players():
             self._end_round()
@@ -58,9 +59,12 @@ class Board:
     def _summarise_tile_levels(self):
         return [tile.level for tile in self.tiles]
 
-    def _apply_current_player_collect_strategy(self, landed_on):
+    def _apply_current_player_collect_strategy(self,):
         do_pickup = self.current_player.strategy.tile_collect(*self._summarise_game())
         if do_pickup:
+            landed_on = self.tiles[self.current_player.position]
+            if isinstance(landed_on, Home) or isinstance(landed_on, BlankTile):
+                raise Cheating('Cannot pick up home tile or blank tile.')
             self.current_player.collect_tile(landed_on)
             self.tiles[self.current_player.position] = BlankTile()
             logger.log(TURN, f'- {self.current_player.name} picked up a level {landed_on.level} tile!!')
@@ -68,6 +72,9 @@ class Board:
     def _apply_current_player_drop_strategy(self):
         do_drop, tile_level = self.current_player.strategy.tile_drop(*self._summarise_game())
         if do_drop:
+            landed_on = self.tiles[self.current_player.position]
+            if isinstance(landed_on, Home) or isinstance(landed_on, Tile):
+                raise Cheating('Cannot drop on non-blank tile.')
             dropped = self.current_player.drop_tile(tile_level)
             self.tiles[self.current_player.position] = dropped
 
@@ -81,9 +88,6 @@ class Board:
         new_position = self._calculate_new_position(roll)
         self.current_player.position = new_position
         self.current_player.n_turn += 1
-        if self.current_player.position == 0:
-            self.current_player.reached_home()
-            return None
         return self.tiles[new_position]
 
     def _calculate_new_position(self, roll):
