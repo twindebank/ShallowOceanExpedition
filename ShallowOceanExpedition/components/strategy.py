@@ -4,7 +4,7 @@ class DefaultStrategy:
 
     @staticmethod
     def decide_direction(player, board, others):
-        # should receive read only views of board and player
+        # should receive read only views of board_2p and player
         if board['round_number'] in [0, 1]:
             # start risky
             change = True if player['turn_number'] > 2 and not player['changed_direction'] else False

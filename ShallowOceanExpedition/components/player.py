@@ -25,7 +25,7 @@ class Player:
         moves = max(roll - self.count_tiles(), 0)
         logger.log(TURN, f'- {self.name} rolled a {roll} {"forward" if self.direction>0 else "backward"}'
                          f': move {moves}!')
-        return self.direction * moves
+        return moves
 
     def collect_tile(self, tile):
         if tile.level is None:

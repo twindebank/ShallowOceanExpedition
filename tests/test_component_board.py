@@ -13,6 +13,11 @@ def board():
     return Board([MockStrategy('1'), MockStrategy('2')])
 
 
+@pytest.fixture
+def board_4p():
+    return Board([MockStrategy('1'), MockStrategy('2'), MockStrategy('3'), MockStrategy('4')])
+
+
 class MockStrategy:
     def __init__(self, name):
         self.player_name = name
@@ -119,6 +124,13 @@ def test_Board_take_turn_land_on_blank(next_player, end_round, has_players, adva
     assert next_player.called
 
 
+@patch('ShallowOceanExpedition.components.board.Board._end_round')
+def test_Board_take_turn_oxygen_depleted(end_round, board):
+    board.oxygen = 0
+    board._take_turn()
+    assert end_round.caled
+
+
 def test_Board_has_players(board):
     assert board._has_players()
 
@@ -216,15 +228,187 @@ def test_Board_apply_current_player_direction_strategy(board):
 
 @patch('ShallowOceanExpedition.components.board.Board._calculate_new_position')
 def test_Board_advance_current_player(new_pos, board):
-    new_pos.return_value = 1
     assert board.current_player.position == 0
     assert board.current_player.n_turn == 0
 
+    new_pos.return_value = 2
     landed_on = board._advance_current_player()
-    assert board.current_player.position == 1
+    assert board.current_player.position == 2
     assert board.current_player.n_turn == 1
     assert landed_on.level == (1,)
 
 
-def test_Board_calculate_new_position():
-    pass
+@patch('ShallowOceanExpedition.components.board.Player.roll')
+def test_Board_calculate_new_position_no_tiles(roll, board_4p):
+    assert board_4p.current_player.position == 0
+
+    # no players in front
+    board_4p.players[0].position = 0
+    board_4p.players[1].position = 0
+    board_4p.players[2].position = 0
+    board_4p.players[3].position = 0
+    roll.return_value = 5
+    new = board_4p._calculate_new_position()
+    assert new == 5
+
+    # one player in front within roll distance
+    board_4p.players[0].position = 0
+    board_4p.players[1].position = 1
+    board_4p.players[2].position = 0
+    board_4p.players[3].position = 0
+    roll.return_value = 5
+    new = board_4p._calculate_new_position()
+    assert new == 6
+
+    # two players in front one within roll distance
+    board_4p.players[0].position = 0
+    board_4p.players[1].position = 1
+    board_4p.players[2].position = 7
+    board_4p.players[3].position = 0
+    roll.return_value = 5
+    new = board_4p._calculate_new_position()
+    assert new == 6
+
+    # two players in front both within roll distance
+    board_4p.players[0].position = 0
+    board_4p.players[1].position = 1
+    board_4p.players[2].position = 5
+    board_4p.players[3].position = 0
+    roll.return_value = 5
+    new = board_4p._calculate_new_position()
+    assert new == 7
+
+    # two in front and one behind
+    board_4p.players[0].position = 3
+    board_4p.players[1].position = 1
+    board_4p.players[2].position = 4
+    board_4p.players[3].position = 5
+    roll.return_value = 5
+    new = board_4p._calculate_new_position()
+    assert new == 10
+
+    # beyond board
+    board_4p.players[0].position = 15
+    board_4p.players[1].position = 0
+    board_4p.players[2].position = 0
+    board_4p.players[3].position = 0
+    roll.return_value = 200
+    new = board_4p._calculate_new_position()
+    assert new == len(board_4p.tiles) - 1
+
+    # roll none
+    board_4p.players[0].position = 10
+    board_4p.players[1].position = 0
+    board_4p.players[2].position = 0
+    board_4p.players[3].position = 0
+    roll.return_value = 0
+    new = board_4p._calculate_new_position()
+    assert new == 10
+
+    # backward none in roll distance
+    board_4p.players[0].direction = -1
+    board_4p.players[0].position = 5
+    board_4p.players[1].position = 0
+    board_4p.players[2].position = 0
+    board_4p.players[3].position = 0
+    roll.return_value = 3
+    new = board_4p._calculate_new_position()
+    assert new == 2
+
+    # backwards one in roll distance
+    board_4p.players[0].direction = -1
+    board_4p.players[0].position = 5
+    board_4p.players[1].position = 3
+    board_4p.players[2].position = 0
+    board_4p.players[3].position = 0
+    roll.return_value = 3
+    new = board_4p._calculate_new_position()
+    assert new == 1
+
+    # backwards one in roll distance one not
+    board_4p.players[0].direction = -1
+    board_4p.players[1].position = 5
+    board_4p.players[1].position = 4
+    board_4p.players[2].position = 0
+    board_4p.players[3].position = 1
+    roll.return_value = 2
+    new = board_4p._calculate_new_position()
+    assert new == 2
+
+    # backwards both in roll distance
+    board_4p.players[0].direction = -1
+    board_4p.players[0].position = 5
+    board_4p.players[1].position = 2
+    board_4p.players[2].position = 1
+    board_4p.players[3].position = 0
+    roll.return_value = 3
+    new = board_4p._calculate_new_position()
+    assert new == 0
+
+    # backwards two in distance one in front
+    board_4p.players[0].direction = -1
+    board_4p.players[0].position = 5
+    board_4p.players[1].position = 4
+    board_4p.players[2].position = 1
+    board_4p.players[3].position = 6
+    roll.return_value = 3
+    new = board_4p._calculate_new_position()
+    assert new == 0
+
+    # backwards beyond home
+    board_4p.players[0].direction = -1
+    board_4p.players[0].position = 5
+    board_4p.players[1].position = 0
+    board_4p.players[2].position = 0
+    board_4p.players[3].position = 0
+    roll.return_value = 200
+    new = board_4p._calculate_new_position()
+    assert new == 0
+
+
+def test_Board_get_other_player_positions(board_4p):
+    assert board_4p._get_other_player_positions() == [0, 0, 0]
+
+    board_4p.players[0].position = 1
+    assert board_4p._get_other_player_positions() == [0, 0, 0]
+
+    board_4p.players[0].position = 1
+    board_4p.players[1].position = 2
+    assert board_4p._get_other_player_positions() == [2, 0, 0]
+
+    board_4p.players[0].position = 1
+    board_4p.players[1].position = 2
+    board_4p.players[2].position = 3
+    board_4p.players[3].position = 4
+    assert board_4p._get_other_player_positions() == [2, 3, 4]
+
+
+def test_Board_get_other_players(board_4p):
+    other_players = board_4p._get_other_players()
+    assert [player.name for player in other_players] == ['2', '3', '4']
+
+
+def test_Board_next_player(board_4p):
+    players = board_4p.players
+    assert board_4p.current_player == players[0]
+
+    board_4p._next_player()
+    assert board_4p.current_player == players[1]
+
+    board_4p._next_player()
+    assert board_4p.current_player == players[2]
+
+    board_4p._next_player()
+    assert board_4p.current_player == players[3]
+
+    board_4p._next_player()
+    assert board_4p.current_player == players[0]
+
+
+@patch('ShallowOceanExpedition.components.board.Board._end_round')
+def test_Board_reduce_ox_by(end_round, board):
+    assert board.oxygen == 25
+
+    board._reduce_ox_by(5)
+    assert board.oxygen == 20
+

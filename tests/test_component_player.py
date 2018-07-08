@@ -46,23 +46,6 @@ def test_Player_roll_counts_with_tiles(player):
     assert set(rolls) == {3, 2, 1, 0}
 
 
-def test_Player_roll_counts_backwards(player):
-    player.direction = -1
-    rolls = []
-    for _ in range(100):
-        rolls.append(player.roll())
-    assert set(rolls) == {-6, -5, -4, -3, -2}
-
-
-def test_Player_roll_counts_with_tiles_backwards(player):
-    player.direction = -1
-    player.tiles = [(1,), (1,), (1,)]
-    rolls = []
-    for _ in range(100):
-        rolls.append(player.roll())
-    assert set(rolls) == {-3, -2, -1, 0}
-
-
 class MockTile:
     def __init__(self, level):
         self.level = (level,) if level else None

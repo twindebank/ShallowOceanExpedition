@@ -20,6 +20,7 @@ Create a class inheriting from `game.components.strategy.DefaultStrategy` and ov
 
 ## ToDo/Bugs
 - tests
+- add checks for no tiles left
 - profile code and speed up
 
 

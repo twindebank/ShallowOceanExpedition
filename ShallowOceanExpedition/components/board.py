@@ -35,7 +35,10 @@ class Board:
                 break
 
     def _take_turn(self):
-        if not self.current_player.back_home:
+        if self.oxygen < 1:
+            logger.log(ROUND, '\nOxygen depleted!')
+            self._end_round()
+        elif not self.current_player.back_home:
             logger.log(TURN, f"\nIt's {self.current_player.name}'s go!")
             self._reduce_ox_by(self.current_player.count_tiles())
             self._apply_current_player_direction_strategy()
@@ -48,6 +51,7 @@ class Board:
                 else:
                     self._apply_current_player_collect_strategy()
             logger.log(TURN, self.current_player)
+
         if not self._has_players():
             self._end_round()
         else:
@@ -84,19 +88,24 @@ class Board:
             self.current_player.change_direction()
 
     def _advance_current_player(self):
-        roll = self.current_player.roll()
-        new_position = self._calculate_new_position(roll)
+        new_position = self._calculate_new_position()
         self.current_player.position = new_position
         self.current_player.n_turn += 1
         return self.tiles[new_position]
 
-    def _calculate_new_position(self, roll):
+    def _calculate_new_position(self):
+        distance = self.current_player.direction * self.current_player.roll()
         other_positions = [pos for pos in self._get_other_player_positions() if pos > 0]
         curr_position = self.current_player.position
-        for other_player_pos in other_positions:
-            if curr_position <= other_player_pos <= curr_position + roll:
-                roll += 1
-        return max(0, min(curr_position + roll, len(self.tiles) - 1))
+        if self.current_player.direction == 1:
+            for other_player_pos in other_positions:
+                if curr_position <= other_player_pos <= curr_position + distance:
+                    distance += 1
+        else:
+            for other_player_pos in other_positions:
+                if curr_position >= other_player_pos >= curr_position + distance:
+                    distance -= 1
+        return max(0, min(curr_position + distance, len(self.tiles) - 1))
 
     def _get_other_player_positions(self):
         return [player.position for player in self.players if player is not self.current_player]
@@ -113,9 +122,6 @@ class Board:
                        f'- {self.current_player.name} has {self.current_player.count_tiles()} tile(s), oxygen reduced '
                        f'from {self.oxygen} to {self.oxygen - n}')
         self.oxygen -= n
-        if self.oxygen < 0:
-            logger.log(ROUND, '\nOxygen depleted!')
-            self._end_round()
 
     def _end_round(self):
         dropped_tiles = {}
