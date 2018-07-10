@@ -5,7 +5,7 @@ import pytest
 
 from ShallowOceanExpedition.components.board import Board
 from ShallowOceanExpedition.components.tiles import Home, BlankTile, Tile
-from ShallowOceanExpedition.utils.exceptions import RoundOver, Cheating
+from ShallowOceanExpedition.utils.exceptions import RoundOver, Cheating, RuleViolation
 
 
 @pytest.fixture
@@ -26,6 +26,7 @@ class MockStrategy:
 class MockTile:
     def __init__(self, level):
         self.level = level if level is None else tuple([level])
+        self.value = level
 
 
 def test_Board_init(board):
@@ -53,6 +54,10 @@ def test_Board_init(board):
 @patch('ShallowOceanExpedition.components.board.Board._take_turn', side_effect=RoundOver)
 def test_Board_play_round(board):
     board.play_round()
+
+
+def test_Board_end_round(board):
+    assert False
 
 
 @patch('ShallowOceanExpedition.components.board.Board._reduce_ox_by')
@@ -405,10 +410,77 @@ def test_Board_next_player(board_4p):
     assert board_4p.current_player == players[0]
 
 
-@patch('ShallowOceanExpedition.components.board.Board._end_round')
-def test_Board_reduce_ox_by(end_round, board):
+def test_Board_reduce_ox_by(board):
     assert board.oxygen == 25
 
     board._reduce_ox_by(5)
     assert board.oxygen == 20
 
+    with pytest.raises(RuleViolation):
+        board._reduce_ox_by(20)
+
+
+def test_Board_kill_players_gather_tiles_all_home(board):
+    board.players[0].back_home = True
+    board.players[0].tiles = [MockTile(1), MockTile(2), MockTile(3)]
+    board.players[0].kill = MagicMock()
+
+    board.players[1].back_home = True
+    board.players[1].tiles = []
+    board.players[1].kill = MagicMock()
+
+    ordered_stacks = board._kill_players_gather_tiles()
+    assert ordered_stacks == []
+    assert not board.players[0].kill.called
+    assert not board.players[1].kill.called
+
+
+def test_Board_kill_players_gather_tiles_none_home(board_4p):
+    board_4p.players[0].back_home = False
+    board_4p.players[0].position = 5
+    board_4p.players[0].kill = MagicMock()
+    board_4p.players[0].kill.return_value = [MockTile(1)]
+
+    board_4p.players[1].back_home = False
+    board_4p.players[1].position = 10
+    board_4p.players[1].tiles = []
+    board_4p.players[1].kill = MagicMock()
+    board_4p.players[1].kill.return_value = [MockTile(1), MockTile(2)]
+
+    board_4p.players[2].back_home = False
+    board_4p.players[2].position = 15
+    board_4p.players[2].kill = MagicMock()
+    board_4p.players[2].kill.return_value = []
+
+    board_4p.players[3].back_home = False
+    board_4p.players[3].position = 20
+    board_4p.players[3].kill = MagicMock()
+    board_4p.players[3].kill.return_value = [MockTile(3)]
+
+    ordered_stacks = board_4p._kill_players_gather_tiles()
+    assert len(ordered_stacks) == 3
+
+    assert board_4p.players[0].kill.called
+    assert board_4p.players[1].kill.called
+    assert board_4p.players[2].kill.called
+    assert board_4p.players[3].kill.called
+
+    assert ordered_stacks[0].level == (1,)
+    assert ordered_stacks[1].level == (1, 2)
+    assert ordered_stacks[2].level == (3,)
+
+
+def test_Board_reform_tiles():
+    assert False
+
+
+def test_Board_summarise_game():
+    assert False
+
+
+def test_Board_order_players():
+    assert False
+
+
+def test_Board_get_stats():
+    assert False
