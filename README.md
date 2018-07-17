@@ -20,7 +20,8 @@ Create a class inheriting from `game.components.strategy.DefaultStrategy` and ov
 
 ## ToDo/Bugs
 - tests
-- add checks for no tiles left
+- add setup.cfg
+- set up with coveralls, drone, etc
 - profile code and speed up
 
 

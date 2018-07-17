@@ -74,7 +74,7 @@ class Board:
         return [tile.level for tile in self.tiles]
 
     def _apply_current_player_collect_strategy(self, ):
-        do_pickup = self.current_player.strategy.tile_collect(*self._summarise_game())
+        do_pickup = self.current_player.strategy.tile_collect(*self._summarise_game_states())
         if do_pickup:
             landed_on = self.tiles[self.current_player.position]
             if isinstance(landed_on, Home) or isinstance(landed_on, BlankTile):
@@ -84,7 +84,7 @@ class Board:
             logger.log(TURN, f'- {self.current_player.name} picked up a level {landed_on.level} tile!!')
 
     def _apply_current_player_drop_strategy(self):
-        do_drop, tile_level = self.current_player.strategy.tile_drop(*self._summarise_game())
+        do_drop, tile_level = self.current_player.strategy.tile_drop(*self._summarise_game_states())
         if do_drop:
             landed_on = self.tiles[self.current_player.position]
             if isinstance(landed_on, Home) or isinstance(landed_on, Tile):
@@ -93,7 +93,7 @@ class Board:
             self.tiles[self.current_player.position] = dropped
 
     def _apply_current_player_direction_strategy(self):
-        do_change = self.current_player.strategy.decide_direction(*self._summarise_game())
+        do_change = self.current_player.strategy.decide_direction(*self._summarise_game_states())
         if do_change:
             self.current_player.change_direction()
 
@@ -148,8 +148,10 @@ class Board:
     def _reform_tiles(self, ordered_stacks):
         self.tiles = [tile for tile in self.tiles if tile.level]
         self.tiles.extend(ordered_stacks)
+        if not self.tiles:
+            raise RoundOver('Ran out of tiles!')
 
-    def _summarise_game(self):
+    def _summarise_game_states(self):
         player = {
             'tiles': self.current_player.summarise_tiles(),
             'position': self.current_player.position,
@@ -167,7 +169,7 @@ class Board:
                 'tiles': player.summarise_tiles(),
                 'position': player.position,
                 'bank': player.bank,
-                'changed_direction': True if player.direction > 0 else False,
+                'changed_direction': False if player.direction > 0 else True,
                 'turn_number': player.n_turn
             } for player in self._get_other_players()
         }
@@ -176,16 +178,18 @@ class Board:
     def print_end_game_summary(self):
         logger.log(GAME, '\nGame over!')
         banks = {player.name: player.bank for player in self.players}
-        winner = max(banks, key=banks.get)
-        # todo show no winner if all 0
-        logger.log(GAME, f'The winner is {winner} with a score of {banks[winner]}!!')
-        del banks[winner]
-        logger.log(GAME, f'Other scores: {banks}')
+        if any(banks.values()):
+            winner = max(banks, key=banks.get)
+            logger.log(GAME, f'The winner is {winner} with a score of {banks[winner]}!!')
+            del banks[winner]
+            logger.log(GAME, f'Other scores: {banks}')
+        else:
+            logger.log(GAME, 'There are no winners :-(')
 
     def _order_players(self):
-        if self._has_players():
-            # if player killed then furthest one
-            positions = {player.name: player.position for player in self.players}
+
+        positions = {player.name: player.position for player in self.players}
+        if any(positions.values()):
             last_player = max(positions, key=positions.get)
             while self.current_player.name != last_player:
                 self._next_player()

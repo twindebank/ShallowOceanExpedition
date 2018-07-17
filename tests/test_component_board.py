@@ -1,11 +1,12 @@
 from copy import copy
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 
 import pytest
 
 from ShallowOceanExpedition.components.board import Board
 from ShallowOceanExpedition.components.tiles import Home, BlankTile, Tile
 from ShallowOceanExpedition.utils.exceptions import RoundOver, Cheating, RuleViolation
+from ShallowOceanExpedition.utils.logging import GAME
 
 
 @pytest.fixture
@@ -244,7 +245,7 @@ def test_Board_advance_current_player(new_pos, board):
 
 
 @patch('ShallowOceanExpedition.components.board.Player.roll')
-def test_Board_calculate_new_position_no_tiles(roll, board_4p):
+def test_Board_calculate_new_position_no_player_with_tiles(roll, board_4p):
     assert board_4p.current_player.position == 0
 
     # no players in front
@@ -443,7 +444,6 @@ def test_Board_kill_players_gather_tiles_none_home(board_4p):
 
     board_4p.players[1].back_home = False
     board_4p.players[1].position = 10
-    board_4p.players[1].tiles = []
     board_4p.players[1].kill = MagicMock()
     board_4p.players[1].kill.return_value = [MockTile(1), MockTile(2)]
 
@@ -470,17 +470,236 @@ def test_Board_kill_players_gather_tiles_none_home(board_4p):
     assert ordered_stacks[2].level == (3,)
 
 
-def test_Board_reform_tiles():
-    assert False
+def test_Board_reform_tiles(board):
+    tile1, tile2, tile3 = MockTile(1), MockTile(2), MockTile(3)
+
+    ordered_stacks = [tile1, tile2]
+    board.tiles = [tile3]
+    board._reform_tiles(ordered_stacks)
+    assert board.tiles == [tile3, tile1, tile2]
+
+    ordered_stacks = [tile1, tile2]
+    board.tiles = [tile3, BlankTile()]
+    board._reform_tiles(ordered_stacks)
+    assert board.tiles == [tile3, tile1, tile2]
+
+    ordered_stacks = [tile2]
+    board.tiles = [tile3, BlankTile(), tile1]
+    board._reform_tiles(ordered_stacks)
+    assert board.tiles == [tile3, tile1, tile2]
+
+    ordered_stacks = []
+    board.tiles = [tile3, BlankTile(), tile1]
+    board._reform_tiles(ordered_stacks)
+    assert board.tiles == [tile3, tile1]
+
+    board.tiles = []
+    with pytest.raises(RoundOver):
+        board._reform_tiles([])
 
 
-def test_Board_summarise_game():
-    assert False
+def test_Board_summarise_game_states(board, board_4p):
+    player_summary, board_summary, other_player_summary = board_4p._summarise_game_states()
+    expected_player_summary = {
+        'bank': 0,
+        'changed_direction': False,
+        'position': 0,
+        'tiles': {},
+        'turn_number': 0
+    }
+    expected_board_summary = {
+        'oxygen': 25,
+        'round_number': 0,
+        'tiles': ['Home', (1,), (1,), (1,), (1,), (1,), (2,), (2,), (2,), (2,), (2,), (3,), (3,), (3,), (3,), (3,),
+                  (4,), (4,), (4,), (4,), (4,)]
+    }
+    expected_other_player_summary = {
+        '2': {
+            'bank': 0,
+            'changed_direction': False,
+            'position': 0,
+            'tiles': {},
+            'turn_number': 0
+        },
+        '3': {
+            'bank': 0,
+            'changed_direction': False,
+            'position': 0,
+            'tiles': {},
+            'turn_number': 0
+        },
+        '4': {
+            'bank': 0,
+            'changed_direction': False,
+            'position': 0,
+            'tiles': {},
+            'turn_number': 0
+        }
+    }
+
+    assert board_summary == expected_board_summary
+    assert player_summary == expected_player_summary
+    assert expected_other_player_summary == other_player_summary
+
+    tile1, tile2 = MockTile(1), MockTile(2)
+    board.players[0].bank = 5
+    board.players[0].direction = -1
+    board.players[0].position = 5
+    board.players[0].tiles = [tile1, tile2]
+    board.players[0].turn_number = 5
+
+    board.players[1].bank = 10
+    board.players[1].direction = 1
+    board.players[1].position = 10
+    board.players[1].tiles = [tile2, tile1]
+    board.players[1].turn_number = 5
+
+    board.round_number = 5
+    board.oxygen = 5
+    board.tiles = [tile1, tile2]
+
+    player_summary, board_summary, other_player_summary = board._summarise_game_states()
+
+    expected_board_summary = {
+        'oxygen': 5,
+        'round_number': 5,
+        'tiles': [(1,), (2,)]
+    }
+    expected_player_summary = {
+        'bank': 5,
+        'changed_direction': True,
+        'position': 5,
+        'tiles': {(1,): 1, (2,): 1},
+        'turn_number': 0
+    }
+    expected_other_player_summary = {
+        '2': {
+            'bank': 10,
+            'changed_direction': False,
+            'position': 10,
+            'tiles': {(1,): 1, (2,): 1},
+            'turn_number': 0
+        }
+    }
+
+    assert board_summary == expected_board_summary
+    assert player_summary == expected_player_summary
+    assert expected_other_player_summary == other_player_summary
 
 
-def test_Board_order_players():
-    assert False
+def test_Board_print_end_game_summary(board):
+    with patch('ShallowOceanExpedition.components.board.logger') as mock_logger:
+        board.players[0].bank = 0
+        board.players[1].bank = 0
+        board.print_end_game_summary()
+        mock_logger.log.assert_called_with(GAME, 'There are no winners :-(')
+
+    with patch('ShallowOceanExpedition.components.board.logger') as mock_logger:
+        board.players[0].bank = 0
+        board.players[1].bank = 10
+        board.print_end_game_summary()
+        assert call(GAME, "The winner is 2 with a score of 10!!") in mock_logger.log.call_args_list
+        assert call(GAME, "Other scores: {'1': 0}") in mock_logger.log.call_args_list
+
+    with patch('ShallowOceanExpedition.components.board.logger') as mock_logger:
+        board.players[0].bank = 20
+        board.players[1].bank = 10
+        board.print_end_game_summary()
+        assert call(GAME, "The winner is 1 with a score of 20!!") in mock_logger.log.call_args_list
+        assert call(GAME, "Other scores: {'2': 10}") in mock_logger.log.call_args_list
 
 
-def test_Board_get_stats():
-    assert False
+def test_Board_order_players(board_4p):
+    p0 = board_4p.players[0]
+    p1 = board_4p.players[1]
+    p2 = board_4p.players[2]
+    p3 = board_4p.players[3]
+
+    p0.position = 4
+    p1.position = 5
+    p2.position = 10
+    p3.position = 1
+
+    board_4p._order_players()
+
+    # assert furthest player goes first
+    assert board_4p.current_player == p2
+    board_4p._next_player()
+    assert board_4p.current_player == p3
+    board_4p._next_player()
+    assert board_4p.current_player == p0
+    board_4p._next_player()
+    assert board_4p.current_player == p1
+
+    p0.position = 0
+    p1.position = 0
+    p2.position = 0
+    p3.position = 0
+
+    # if everyone home, player who got home last goes first, the 'current_player'
+    assert board_4p.current_player == p1
+    board_4p._next_player()
+    assert board_4p.current_player == p2
+    board_4p._next_player()
+    assert board_4p.current_player == p3
+    board_4p._next_player()
+    assert board_4p.current_player == p0
+
+
+def test_Board_get_stats(board_4p):
+    board_4p.players[0].bank = 5
+    board_4p.players[0].deaths = [True, False, True]
+    board_4p.players[1].bank = 10
+    board_4p.players[1].deaths = [False, False, True]
+    board_4p.players[2].bank = 15
+    board_4p.players[2].deaths = [True, False, False]
+    board_4p.players[3].bank = 20
+    board_4p.players[3].deaths = [True, True, True]
+
+    expected_stats = {
+        '1': {'deaths': [True, False, True], 'rank': 4, 'score': 5},
+        '2': {'deaths': [False, False, True], 'rank': 3, 'score': 10},
+        '3': {'deaths': [True, False, False], 'rank': 2, 'score': 15},
+        '4': {'deaths': [True, True, True], 'rank': 1, 'score': 20}
+    }
+
+    stats = board_4p.get_stats()
+    assert stats == expected_stats
+
+    board_4p.players[0].bank = 0
+    board_4p.players[0].deaths = [True, False, True]
+    board_4p.players[1].bank = 15
+    board_4p.players[1].deaths = [False, False, True]
+    board_4p.players[2].bank = 15
+    board_4p.players[2].deaths = [True, False, False]
+    board_4p.players[3].bank = 20
+    board_4p.players[3].deaths = [True, True, True]
+
+    expected_stats = {
+        '1': {'deaths': [True, False, True], 'rank': None, 'score': 0},
+        '2': {'deaths': [False, False, True], 'rank': 2, 'score': 15},
+        '3': {'deaths': [True, False, False], 'rank': 2, 'score': 15},
+        '4': {'deaths': [True, True, True], 'rank': 1, 'score': 20}
+    }
+
+    stats = board_4p.get_stats()
+    assert stats == expected_stats
+
+    board_4p.players[0].bank = 0
+    board_4p.players[0].deaths = [True, False, True]
+    board_4p.players[1].bank = 0
+    board_4p.players[1].deaths = [False, False, True]
+    board_4p.players[2].bank = 0
+    board_4p.players[2].deaths = [True, False, False]
+    board_4p.players[3].bank = 0
+    board_4p.players[3].deaths = [True, True, True]
+
+    expected_stats = {
+        '1': {'deaths': [True, False, True], 'rank': None, 'score': 0},
+        '2': {'deaths': [False, False, True], 'rank': None, 'score': 0},
+        '3': {'deaths': [True, False, False], 'rank': None, 'score': 0},
+        '4': {'deaths': [True, True, True], 'rank': None, 'score': 0}
+    }
+
+    stats = board_4p.get_stats()
+    assert stats == expected_stats
