@@ -52,14 +52,31 @@ def test_Board_init(board):
     assert board.current_player.name == '1'
 
 
-@patch('ShallowOceanExpedition.components.board.Board._take_turn', side_effect=RoundOver)
-def test_Board_play_round(board):
+@patch('ShallowOceanExpedition.components.board.Board._end_round')
+@patch('ShallowOceanExpedition.components.board.Board._take_turn')
+def test_Board_play_round(mock_take_turn, mock_end_round, board):
+    mock_take_turn.side_effect = RoundOver()
     board.play_round()
+    mock_take_turn.assert_called()
+    mock_end_round.assert_called()
 
 
-def test_Board_end_round(board):
-    assert False
+@patch('ShallowOceanExpedition.components.board.Board._kill_players_gather_tiles')
+@patch('ShallowOceanExpedition.components.board.Board._reform_tiles')
+def test_Board_end_round(mock_reform_tiles, mock_kill_players_gather_tiles, board):
+    board.round_number = 0
+    board.original_oxygen = 20
+    board.oxygen = 5
+    for player in board.players:
+        player.back_home = True
 
+    board._end_round()
+    assert board.round_number == 1
+    assert board.oxygen == 20
+    mock_kill_players_gather_tiles.assert_called()
+    mock_reform_tiles.assert_called()
+    for player in board.players:
+        assert not player.back_home
 
 @patch('ShallowOceanExpedition.components.board.Board._reduce_ox_by')
 @patch('ShallowOceanExpedition.components.board.Board._apply_current_player_direction_strategy')
@@ -105,8 +122,8 @@ def test_Board_take_turn_land_on_home(next_player, end_round, has_players, advan
 
     board.current_player.reached_home.return_value = True
     board._has_players.return_value = False
-    board._take_turn()
-    assert board._end_round.called
+    with pytest.raises(RoundOver):
+        board._take_turn()
 
 
 @patch('ShallowOceanExpedition.components.board.Board._reduce_ox_by')
@@ -133,8 +150,8 @@ def test_Board_take_turn_land_on_blank(next_player, end_round, has_players, adva
 @patch('ShallowOceanExpedition.components.board.Board._end_round')
 def test_Board_take_turn_oxygen_depleted(end_round, board):
     board.oxygen = 0
-    board._take_turn()
-    assert end_round.caled
+    with pytest.raises(RoundOver):
+        board._take_turn()
 
 
 def test_Board_has_players(board):

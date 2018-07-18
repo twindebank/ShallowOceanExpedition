@@ -23,9 +23,10 @@ Create a class inheriting from `game.components.strategy.DefaultStrategy` and ov
 - add setup.cfg
 - set up with coveralls, drone, etc
 - profile code and speed up
-
+- have a play_game method in board rather than game manager
 
 ## Planned Features
+- have a rules.py file to define game rules like number of rounds, number of tiles of which type, etc...
 - More documentation/examples of custom strategies
     * include examples of dicts to work with
 - docs of logging level

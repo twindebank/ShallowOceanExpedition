@@ -33,6 +33,7 @@ class Board:
                 self._take_turn()
             except RoundOver:
                 self._end_round()
+                break
 
     def _end_round(self):
         self.round_number += 1
