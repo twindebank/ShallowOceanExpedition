@@ -1,3 +1,6 @@
+from ShallowOceanExpedition.utils.exceptions import RuleViolation
+
+
 class DefaultStrategy:
     def __init__(self, player_name):
         self.player_name = player_name
@@ -12,7 +15,7 @@ class DefaultStrategy:
             # reduce risk for last go
             change = True if player['turn_number'] > 1 and not player['changed_direction'] else False
         else:
-            raise Exception()
+            raise RuleViolation()
         return change
 
     @staticmethod
@@ -24,7 +27,7 @@ class DefaultStrategy:
             # reduce risk for last go
             change = True if player['turn_number'] > 0 else False
         else:
-            raise Exception()
+            raise RuleViolation()
         return change
 
     @staticmethod
