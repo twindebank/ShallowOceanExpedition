@@ -78,6 +78,7 @@ def test_Board_end_round(mock_reform_tiles, mock_kill_players_gather_tiles, boar
     for player in board.players:
         assert not player.back_home
 
+
 @patch('ShallowOceanExpedition.components.board.Board._reduce_ox_by')
 @patch('ShallowOceanExpedition.components.board.Board._apply_current_player_direction_strategy')
 @patch('ShallowOceanExpedition.components.board.Board._apply_current_player_drop_strategy')
@@ -154,6 +155,24 @@ def test_Board_take_turn_oxygen_depleted(end_round, board):
         board._take_turn()
 
 
+@patch('ShallowOceanExpedition.components.board.Board._reduce_ox_by')
+@patch('ShallowOceanExpedition.components.board.Board._apply_current_player_direction_strategy')
+@patch('ShallowOceanExpedition.components.board.Board._apply_current_player_drop_strategy')
+@patch('ShallowOceanExpedition.components.board.Board._apply_current_player_collect_strategy')
+@patch('ShallowOceanExpedition.components.board.Board._advance_current_player')
+@patch('ShallowOceanExpedition.components.board.Board._has_players')
+@patch('ShallowOceanExpedition.components.board.Board._end_round')
+@patch('ShallowOceanExpedition.components.board.Board._next_player')
+def test_Board_take_turn_no_players(next_player, end_round, has_players, advance_player,
+                                                      collect_strategy,
+                                                      drop_strategy, direction_strategy, reduce_ox, board):
+
+    board.current_player.back_home = True
+    board._has_players = lambda: False
+    with pytest.raises(RoundOver):
+        board._take_turn()
+
+
 def test_Board_has_players(board):
     assert board._has_players()
 
@@ -200,6 +219,7 @@ def test_Board_apply_current_player_collect_strategy_dont_pickup(board):
     board.current_player.collect_tile = MagicMock()
     tiles = copy(board.tiles)
     board.current_player.strategy.tile_collect.return_value = False
+    board._apply_current_player_collect_strategy()
     assert board.tiles == tiles
     assert not board.current_player.collect_tile.called
 

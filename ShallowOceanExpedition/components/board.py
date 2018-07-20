@@ -74,7 +74,7 @@ class Board:
     def _summarise_tile_levels(self):
         return [tile.level for tile in self.tiles]
 
-    def _apply_current_player_collect_strategy(self, ):
+    def _apply_current_player_collect_strategy(self):
         do_pickup = self.current_player.strategy.tile_collect(*self._summarise_game_states())
         if do_pickup:
             landed_on = self.tiles[self.current_player.position]
@@ -204,6 +204,4 @@ class Board:
                 'rank': banks.index(player.bank) + 1 if player.bank > 0 else None,
                 'deaths': player.deaths
             }
-            if len(player.deaths) > 3:
-                print('here')
         return stats
