@@ -112,11 +112,24 @@ class Board:
             for other_player_pos in sorted(other_positions):
                 if curr_position <= other_player_pos <= curr_position + distance:
                     distance += 1
+
+            # limit to end of tiles
+            end_position = len(self.tiles) - 1
+            distance = min(end_position - curr_position, distance)
+
+            # account for if distance greater than number of tiles and player already at end
+            for other_player_pos in sorted(other_positions, reverse=True):
+                if other_player_pos == end_position:
+                    if other_player_pos <= curr_position + distance:
+                        distance = max(distance - 1, 0)
+                        end_position -= 1
         else:
             for other_player_pos in sorted(other_positions, reverse=True):
                 if curr_position >= other_player_pos >= curr_position + distance:
                     distance -= 1
-        new_pos = max(0, min(curr_position + distance, len(self.tiles) - 1))
+
+        new_pos = max(0, curr_position + distance)
+
         if new_pos in other_positions:
             raise RuleViolation('Cannot move onto another player.')
         return new_pos

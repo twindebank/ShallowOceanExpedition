@@ -414,6 +414,7 @@ def test_Board_calculate_new_position_no_player_with_tiles(roll, board_4p):
     board_4p.players[1].position = 4
     board_4p.players[2].position = 7
     board_4p.players[3].position = 3
+    board_4p.tiles = [MockTile(1)]*12
     roll.return_value = 3
     new = board_4p._calculate_new_position()
     assert new == 5
@@ -427,6 +428,27 @@ def test_Board_calculate_new_position_no_player_with_tiles(roll, board_4p):
     roll.return_value = 3
     new = board_4p._calculate_new_position()
     assert new == 5
+
+    # new breaking case
+    board_4p.players[0].direction = 1
+    board_4p.players[0].position = 8
+    board_4p.players[1].position = 11
+    board_4p.players[2].position = 12
+    board_4p.players[3].position = 7
+    roll.return_value = 5
+    new = board_4p._calculate_new_position()
+    assert new == 10
+
+    # new breaking case
+    board_4p.players[0].direction = 1
+    board_4p.players[0].position = 6
+    board_4p.players[1].position = 10
+    board_4p.players[2].position = 9
+    board_4p.players[3].position = 14
+    board_4p.tiles = [MockTile(1)]*15
+    roll.return_value = 3
+    new = board_4p._calculate_new_position()
+    assert new == 11
 
 
 def test_Board_get_other_player_positions(board_4p):
