@@ -109,14 +109,17 @@ class Board:
         other_positions = [pos for pos in self._get_other_player_positions() if pos > 0]
         curr_position = self.current_player.position
         if self.current_player.direction == 1:
-            for other_player_pos in other_positions:
+            for other_player_pos in sorted(other_positions):
                 if curr_position <= other_player_pos <= curr_position + distance:
                     distance += 1
         else:
-            for other_player_pos in other_positions:
+            for other_player_pos in sorted(other_positions, reverse=True):
                 if curr_position >= other_player_pos >= curr_position + distance:
                     distance -= 1
-        return max(0, min(curr_position + distance, len(self.tiles) - 1))
+        new_pos = max(0, min(curr_position + distance, len(self.tiles) - 1))
+        if new_pos in other_positions:
+            raise RuleViolation('Cannot move onto another player.')
+        return new_pos
 
     def _get_other_player_positions(self):
         return [player.position for player in self.players if player is not self.current_player]
