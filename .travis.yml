@@ -1,0 +1,11 @@
+language: python
+python:
+  - "3.7"
+cache: pip
+install:
+  - pip install setup.py
+  - pip install -r requirements.test.txt
+script:
+  - pytest --cov-report term-missing --cov=app -vv --cov-branch tests/
+  - pycodestyle ShallowOceanExpedition tests
+  - flake8 ShallowOceanExpedition tests
