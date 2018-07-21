@@ -454,9 +454,6 @@ def test_Board_reduce_ox_by(board):
     board._reduce_ox_by(5)
     assert board.oxygen == 20
 
-    with pytest.raises(RuleViolation):
-        board._reduce_ox_by(20)
-
 
 def test_Board_kill_players_gather_tiles_all_home(board):
     board.players[0].back_home = True

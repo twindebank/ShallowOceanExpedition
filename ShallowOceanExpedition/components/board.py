@@ -47,7 +47,7 @@ class Board:
             player.back_home = False
 
     def _take_turn(self):
-        if self.oxygen < 1:
+        if self.oxygen <= 0:
             logger.log(ROUND, '\nOxygen depleted!')
             raise RoundOver()
         elif not self.current_player.back_home:
@@ -129,8 +129,6 @@ class Board:
 
     def _reduce_ox_by(self, n):
         self.oxygen -= n
-        if self.oxygen < 1:
-            raise RuleViolation('Oxygen cannot go below 1.')
         logger.log(TURN,
                    f'- {self.current_player.name} has {self.current_player.count_tiles()} tile(s), oxygen reduced '
                    f'from {self.oxygen} to {self.oxygen - n}')
