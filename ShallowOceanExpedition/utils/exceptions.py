@@ -8,3 +8,7 @@ class Cheating(Exception):
 
 class PlayerHome(Exception):
     pass
+
+
+class RuleViolation(Exception):
+    pass

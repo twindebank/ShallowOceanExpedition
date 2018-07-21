@@ -1,17 +1,7 @@
 from random import randint
 
-from ShallowOceanExpedition.utils.exceptions import Cheating
+from ShallowOceanExpedition.utils.exceptions import Cheating, RuleViolation
 from ShallowOceanExpedition.utils.logging import logger, TURN, ROUND
-
-
-def player_must_be_finished(attempted_func):
-    def raise_if_cheating(player, *args, **kwargs):
-        if not player.finished:
-            raise Cheating('This method cannot be called whilst the player is playing!')
-        else:
-            return attempted_func(player, *args, **kwargs)
-
-    return raise_if_cheating
 
 
 class Player:
@@ -23,8 +13,7 @@ class Player:
         self.bank = 0
         self.n_turn = 0
         self.strategy = strategy
-        self.finished = False
-        self.killed = False
+        self.back_home = False
         self.deaths = []
 
     @property
@@ -36,13 +25,16 @@ class Player:
         moves = max(roll - self.count_tiles(), 0)
         logger.log(TURN, f'- {self.name} rolled a {roll} {"forward" if self.direction>0 else "backward"}'
                          f': move {moves}!')
-        return self.direction * moves
+        return moves
 
     def collect_tile(self, tile):
+        if tile.level is None:
+            raise RuleViolation('Cant pick up blank tile.')
         self.tiles.append(tile)
 
     def drop_tile(self, tile_level):
-        """Automatically drop lowest"""
+        if not self.tiles:
+            raise RuleViolation('No tiles to drop.')
         tile_index_to_drop = [tile.level for tile in self.tiles].index(tile_level)
         return self.tiles.pop(tile_index_to_drop)
 
@@ -60,32 +52,34 @@ class Player:
         self.direction = -1
 
     def kill(self):
+        if self.back_home:
+            raise Cheating('Player already home.')
         logger.log(ROUND, f"- {self.name} didn't make it, they lost {self.count_tiles()} tiles :-(")
         dropped_tiles = self.tiles
-        self.killed = True
+        self.clear_player()
         return dropped_tiles
 
-    def end_round(self):
+    def reached_home(self):
+        if self.back_home:
+            raise Cheating('Player already home.')
+        logger.log(ROUND, f"{self.name} made it!!")
+        self.back_home = True
+        self.bank += self.get_tile_values()
+        self.clear_player()
+
+    def clear_player(self):
         self.tiles = []
         self.position = 0
         self.direction = 1
         self.n_turn = 0
-        self.finished = False
-        self.deaths.append(self.killed)
-        self.killed = False
+        self.deaths.append(not self.back_home)
 
-    @player_must_be_finished
     def get_tile_values(self):
+        if not self.back_home:
+            raise Cheating('This method cannot be called whilst the player is playing!')
         return sum(tile.value for tile in self.tiles)
 
-    @player_must_be_finished
-    def bank_tiles(self):
-        logger.log(ROUND, f"{self.name} made it!!")
-        value = self.get_tile_values()
-        self.bank += value
-        self.finished = True
-
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return f"""- Summary for {self.name}:
   * Tiles: {self.summarise_tiles()}
   * Position: {self.position}
@@ -93,5 +87,5 @@ class Player:
   * Turn number: {self.n_turn}
   * Direction: {"forward" if self.direction>0 else "backward"}"""
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return self.name

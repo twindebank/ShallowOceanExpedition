@@ -6,28 +6,6 @@ class Home:
         self.value = None
         self.level = 'Home'
 
-    def __repr__(self):
-        return """Home"""
-
-
-class TileStack:
-    def __init__(self, tiles):
-        self._tiles = tiles
-        level = []
-        for tile in tiles:
-            level.extend(tile.level)
-        self.level = tuple(level)
-        self.__value = None
-
-    @property
-    def value(self):
-        if self.__value is None:
-            self.__value = sum([tile.value for tile in self._tiles])
-        return self.__value
-
-    def __repr__(self):
-        return f"""Level: {self.level}"""
-
 
 class Tile:
     def __init__(self, level):
@@ -37,9 +15,7 @@ class Tile:
         """
         self.level = level,
         self.__value = None
-        if level == 0:
-            self.value_range = [0]
-        elif level == 1:
+        if level == 1:
             self.value_range = range(0, 5)
         elif level == 2:
             self.value_range = range(5, 10)
@@ -56,5 +32,27 @@ class Tile:
             self.__value = choice(self.value_range)
         return self.__value
 
-    def __repr__(self):
-        return f"""Level: {self.level}"""
+
+class BlankTile:
+    level = None
+    @property
+    def value(self):
+        raise ValueError("Blank tile has no value.")
+
+
+class TileStack:
+    def __init__(self, tiles):
+        if not tiles:
+            raise ValueError("No tiles given.")
+        self._tiles = tiles
+        level = []
+        for tile in tiles:
+            level.extend(tile.level)
+        self.level = tuple(level)
+        self.__value = None
+
+    @property
+    def value(self):
+        if self.__value is None:
+            self.__value = sum([tile.value for tile in self._tiles])
+        return self.__value

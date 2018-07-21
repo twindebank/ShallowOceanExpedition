@@ -1,9 +1,10 @@
+from datetime import datetime
+
 from tqdm import tqdm
 
 from ShallowOceanExpedition.components.board import Board
 from ShallowOceanExpedition.utils.logging import logger, SIM
 from ShallowOceanExpedition.utils.pretty_plot import PrettyPlot
-from datetime import datetime
 
 
 class GameManager:
@@ -14,8 +15,12 @@ class GameManager:
         self._simulation_time = datetime.now().strftime("%Y-%m-%d %H:%M")
         self._plot_title = None
 
+    @property
+    def new_board(self):
+        return Board(self.strategies, **self.board_params)
+
     def run_n_rounds(self, n):
-        board = Board(self.strategies, **self.board_params)
+        board = self.new_board
         for _ in range(n):
             board.play_round()
         stats = board.get_stats()
@@ -43,8 +48,7 @@ class GameManager:
     def run_n_games_with_all_strategy_combinations(self, n, rounds_per_game=3):
         pass
 
-    def plot_wins(self, save_path):
-        logger.log(SIM, 'Plotting wins...')
+    def aggregate_wins(self):
         wins = {}
         for game_stat in self.stats:
             for strategy_name, strategy_stat in game_stat.items():
@@ -52,6 +56,11 @@ class GameManager:
                     wins[strategy_name] = 0
                 if strategy_stat['rank'] == 1:
                     wins[strategy_name] += 1
+        return wins
+
+    def plot_wins(self, save_path): # pragma: no cover
+        logger.log(SIM, 'Plotting wins...')
+        wins = self.aggregate_wins()
 
         plot = PrettyPlot()
         plot.add_bar_chart(
