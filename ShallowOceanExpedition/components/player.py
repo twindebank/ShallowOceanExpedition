@@ -1,6 +1,6 @@
 from random import randint
 
-from ShallowOceanExpedition.utils.exceptions import Cheating
+from ShallowOceanExpedition.utils.exceptions import Cheating, RuleViolation
 from ShallowOceanExpedition.utils.logging import logger, TURN, ROUND
 
 
@@ -29,12 +29,12 @@ class Player:
 
     def collect_tile(self, tile):
         if tile.level is None:
-            raise ValueError('Cant pick up blank tile.')
+            raise RuleViolation('Cant pick up blank tile.')
         self.tiles.append(tile)
 
     def drop_tile(self, tile_level):
         if not self.tiles:
-            raise ValueError('No tiles to drop.')
+            raise RuleViolation('No tiles to drop.')
         tile_index_to_drop = [tile.level for tile in self.tiles].index(tile_level)
         return self.tiles.pop(tile_index_to_drop)
 

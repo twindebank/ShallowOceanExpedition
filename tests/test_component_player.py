@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 
 from ShallowOceanExpedition.components.player import Player
-from ShallowOceanExpedition.utils.exceptions import Cheating
+from ShallowOceanExpedition.utils.exceptions import Cheating, RuleViolation
 
 
 class MockStrategy:
@@ -58,12 +58,12 @@ def test_Player_collect_tile(player):
     player.collect_tile(MockTile(1))
     assert len(player.tiles) == 1
 
-    with pytest.raises(ValueError):
+    with pytest.raises(RuleViolation):
         player.collect_tile(MockTile(None))
 
 
 def test_Player_drop_tile(player):
-    with pytest.raises(ValueError):
+    with pytest.raises(RuleViolation):
         player.drop_tile(None)
 
     tile = MockTile(1)
