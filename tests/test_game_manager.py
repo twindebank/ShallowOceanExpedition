@@ -58,12 +58,12 @@ def test_GameManager_run_n_games_and_rotate_strategies():
     assert game_manager.plot_title == 'Time: Rotated Strategies, 10 Games Per Rotation, 2 Rounds Per Game '
 
 
-def test_GameManager_run_n_games_and_permute_strategies():
-    assert False
-
-
-def test_GameManager_run_n_games_with_all_strategy_combinations():
-    assert False
+# def test_GameManager_run_n_games_and_permute_strategies():
+#     assert False
+#
+#
+# def test_GameManager_run_n_games_with_all_strategy_combinations():
+#     assert False
 
 
 def test_GameManager_aggregate_wins(game_manager):

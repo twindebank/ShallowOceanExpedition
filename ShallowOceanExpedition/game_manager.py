@@ -58,7 +58,7 @@ class GameManager:
                     wins[strategy_name] += 1
         return wins
 
-    def plot_wins(self, save_path): # pragma: no cover
+    def plot_wins(self, save_path):  # pragma: no cover
         logger.log(SIM, 'Plotting wins...')
         wins = self.aggregate_wins()
 

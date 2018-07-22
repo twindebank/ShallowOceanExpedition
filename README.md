@@ -1,4 +1,7 @@
-# Shallow Ocean Expedition :ocean: :ship:
+# Shallow Ocean Expedition :ocean: :ship: [![Build Status](https://semaphoreci.com/api/v1/twindebank/shallowoceanexpedition/branches/master/badge.svg)](https://semaphoreci.com/twindebank/shallowoceanexpedition)
+
+[![Maintainability](https://api.codeclimate.com/v1/badges/d10f25e10c37e86728fb/maintainability)](https://codeclimate.com/github/twindebank/ShallowOceanExpedition/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/d10f25e10c37e86728fb/test_coverage)](https://codeclimate.com/github/twindebank/ShallowOceanExpedition/test_coverage)
 
 Simulate runs of a game with the ability to define custom strategies. 
 Written in Python 3.6.

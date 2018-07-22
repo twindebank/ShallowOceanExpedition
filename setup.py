@@ -29,5 +29,12 @@ if __name__ == "__main__":
             'pytz==2018.4',
             'six==1.11.0',
             'tqdm==4.23.4'
-        ]
+        ],
+        test_suite="tests",
+        setup_requires=[
+            'pytest-runner',
+            'flake8',
+            'pytest-cov'
+        ],
+        tests_require=['pytest'],
     )

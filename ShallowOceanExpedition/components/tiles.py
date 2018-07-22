@@ -35,6 +35,7 @@ class Tile:
 
 class BlankTile:
     level = None
+
     @property
     def value(self):
         raise ValueError("Blank tile has no value.")
